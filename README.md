@@ -1,0 +1,2 @@
+# encs4380-dynamics_Rahaf_Samar_Yasmeen_Sewar
+Interactive Dynamic Characteristics Toolkit
