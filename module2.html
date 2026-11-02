@@ -1,0 +1,407 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Module 2 - First-Order Frequency Response</title>
+
+    <!-- Plotly library is used to draw the graphs -->
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+    <!-- Connect the CSS file -->
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f2fa;
+            color: #24164d;
+        }
+
+        .top {
+            background: rgb(19, 5, 64);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .top h1 {
+            margin: 0 0 10px;
+        }
+
+        .top p {
+            margin: 0;
+            color: #ded8f2;
+        }
+
+        .page {
+            max-width: 1200px;
+            margin: 25px auto;
+            padding: 0 18px;
+        }
+
+        .module {
+            background: white;
+            padding: 25px;
+            margin-bottom: 22px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+        }
+
+        .module h2 {
+            margin-top: 0;
+            color: rgb(19, 5, 64);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 22px;
+        }
+
+        .controls-panel {
+            background: #f4f1fb;
+            padding: 18px;
+            border-radius: 10px;
+        }
+
+        .controls-panel h3,
+        .plots-panel h3 {
+            margin-top: 0;
+        }
+
+        .slider-box {
+            margin-bottom: 22px;
+        }
+
+        .slider-box label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .slider-box input {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .value {
+            display: block;
+            margin-top: 6px;
+            color: #5b3da8;
+            font-weight: bold;
+        }
+
+        .plots-panel {
+            min-width: 0;
+        }
+
+        .graph {
+            width: 100%;
+            min-height: 340px;
+            margin-bottom: 18px;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .result-box {
+            background: #f4f1fb;
+            padding: 15px;
+            border-radius: 9px;
+            text-align: center;
+        }
+
+        .result-box strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #5b3da8;
+        }
+
+        .result-box span {
+            font-size: 19px;
+            font-weight: bold;
+        }
+
+        .button {
+            background: rgb(19, 5, 64);
+            color: white;
+            border: none;
+            padding: 11px 16px;
+            border-radius: 7px;
+            cursor: pointer;
+            margin: 5px 4px 5px 0;
+            font-size: 14px;
+        }
+
+        .button:hover {
+            background: #50328f;
+        }
+
+        .info {
+            background: #f4f1fb;
+            padding: 15px;
+            border-left: 4px solid #7654bd;
+            border-radius: 6px;
+            line-height: 1.6;
+        }
+
+        .equation {
+            background: #faf9fd;
+            padding: 12px;
+            border-radius: 7px;
+            margin: 10px 0;
+            font-family: "Times New Roman", serif;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        a {
+            color: #d8cdf7;
+        }
+
+        @media (max-width: 750px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .results {
+                grid-template-columns: 1fr;
+            }
+
+            .module {
+                padding: 17px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Page header -->
+    <div class="top">
+        <h1>Dynamic Characteristics Toolkit</h1>
+        <p>Module 2: First-Order Frequency Response</p>
+        <p><a href="index.html">Back to Module 1</a></p>
+    </div>
+
+    <div class="page">
+
+        <!-- Introduction -->
+        <div class="module">
+            <h2>First-Order Frequency Response</h2>
+
+            <p>
+                This module shows how a first-order system responds to a sinusoidal input.
+                Change the system parameters and observe how the output amplitude and phase change.
+            </p>
+
+            <div class="equation">
+                G(s) = K / (τs + 1)
+            </div>
+
+            <div class="info">
+                <strong>Important:</strong>
+                When the input frequency increases, the output amplitude becomes smaller
+                and the phase lag becomes larger.
+            </div>
+        </div>
+
+        <!-- Main controls and sine wave graph -->
+        <div class="module">
+            <h2>1. Interactive Sine Wave Response</h2>
+
+            <div class="layout">
+
+                <!-- System controls -->
+                <div class="controls-panel">
+                    <h3>System Controls</h3>
+
+                    <div class="slider-box">
+                        <label for="gain">Gain (K)</label>
+                        <input type="range" id="gain"
+                               min="0.5" max="5" step="0.1" value="1">
+                        <span class="value" id="gainValue">1</span>
+                    </div>
+
+                    <div class="slider-box">
+                        <label for="tau">Time Constant (τ) - seconds</label>
+                        <input type="range" id="tau"
+                               min="0.01" max="1" step="0.01" value="0.2">
+                        <span class="value" id="tauValue">0.20 s</span>
+                    </div>
+
+                    <div class="slider-box">
+                        <label for="frequency">Input Frequency (f) - Hz</label>
+                        <input type="range" id="frequency"
+                               min="0.1" max="10" step="0.1" value="0.32">
+                        <span class="value" id="frequencyValue">0.32 Hz</span>
+                    </div>
+
+                    <div class="slider-box">
+                        <label for="amplitude">Input Amplitude (A)</label>
+                        <input type="range" id="amplitude"
+                               min="0.5" max="5" step="0.1" value="1">
+                        <span class="value" id="amplitudeValue">1</span>
+                    </div>
+
+                    <button class="button" onclick="setValidationExample()">
+                        Validation Example
+                    </button>
+
+                    <button class="button" onclick="resetControls()">
+                        Reset
+                    </button>
+                </div>
+
+                <!-- Input and output graph -->
+                <div class="plots-panel">
+                    <h3>Input and Output Signals</h3>
+                    <div id="sineGraph" class="graph"></div>
+                </div>
+
+            </div>
+
+            <!-- Calculated results -->
+            <div class="results">
+
+                <div class="result-box">
+                    <strong>Amplitude Ratio (M)</strong>
+                    <span id="mResult">-</span>
+                </div>
+
+                <div class="result-box">
+                    <strong>Phase Lag (φ)</strong>
+                    <span id="phaseResult">-</span>
+                </div>
+
+                <div class="result-box">
+                    <strong>Dynamic Error (δ)</strong>
+                    <span id="errorResult">-</span>
+                </div>
+
+                <div class="result-box">
+                    <strong>Cutoff Frequency (ωc)</strong>
+                    <span id="cutoffResult">-</span>
+                </div>
+
+                <div class="result-box">
+                    <strong>Angular Frequency (ω)</strong>
+                    <span id="omegaResult">-</span>
+                </div>
+
+                <div class="result-box">
+                    <strong>Output Amplitude (KAM)</strong>
+                    <span id="outputAmplitudeResult">-</span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Bode plots -->
+        <div class="module">
+            <h2>2. Bode Plots</h2>
+
+            <p>
+                Bode plots show how the system responds to different input frequencies.
+                The first graph shows the magnitude ratio, and the second graph shows the phase lag.
+            </p>
+
+            <h3>Magnitude Response</h3>
+            <div id="magnitudeGraph" class="graph"></div>
+
+            <h3>Phase Response</h3>
+            <div id="phaseGraph" class="graph"></div>
+
+            <div class="info">
+                The cutoff angular frequency is:
+                <div class="equation">
+                    ωc = 1 / τ
+                </div>
+                At this frequency, the amplitude ratio is approximately 0.707.
+            </div>
+        </div>
+
+        
+<!-- Validation calculations -->
+<div class="module">
+    <h2>3. Validation Checks</h2>
+
+    <p>
+        These calculations check the system response against the required
+        frequency-response examples.
+    </p>
+
+    <div class="results">
+
+        <div class="result-box">
+            <strong>Maximum τ at 100 Hz</strong>
+            <span id="maxTauResult">-</span>
+        </div>
+
+        <div class="result-box">
+            <strong>Phase Lag at 50 Hz</strong>
+            <span id="phase50Result">-</span>
+        </div>
+
+    </div>
+
+    <div class="info" style="margin-top: 15px;">
+        The maximum time constant is calculated using a maximum
+        amplitude error of 5%. The phase lag is then calculated
+        at 50 Hz using this time constant.
+    </div>
+</div>
+
+
+        <!-- Explanation -->
+        <div class="module">
+            <h2>3. Understanding the Results</h2>
+
+            <p><strong>Amplitude Ratio:</strong></p>
+            <div class="equation">
+                M = 1 / √(1 + (ωτ)²)
+            </div>
+
+            <p><strong>Phase Angle:</strong></p>
+            <div class="equation">
+                φ = -tan⁻¹(ωτ)
+            </div>
+
+            <p><strong>Dynamic Error:</strong></p>
+            <div class="equation">
+                δ = M - 1
+            </div>
+
+            <p>
+                The output signal is:
+            </p>
+
+            <div class="equation">
+                y(t) = K A M sin(ωt + φ)
+            </div>
+
+            <div class="info">
+                <strong>Remember:</strong>
+                A negative phase angle means that the output signal lags behind the input signal.
+                A smaller amplitude ratio means that the system reduces the input amplitude more.
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Connect the JavaScript file -->
+    <script src="module2.js"></script>
+
+</body>
+</html>
