@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Module 3 - Second-Order Response</title>
+
+    <!-- Plotly library is used to draw the graphs -->
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f2fa;
+            color: #24164d;
+        }
+
+        .top {
+            background: rgb(19, 5, 64);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .top h1 {
+            margin: 0 0 10px;
+        }
+
+        .top p {
+            margin: 0 0 6px;
+            color: #ded8f2;
+        }
+
+        .page {
+            max-width: 1200px;
+            margin: 25px auto;
+            padding: 0 18px;
+        }
+
+        .module {
+            background: white;
+            padding: 25px;
+            margin-bottom: 22px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+        }
+
+        .module h2 {
+            margin-top: 0;
+            color: rgb(19, 5, 64);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 22px;
+        }
+
+        .controls-panel {
+            background: #f4f1fb;
+            padding: 18px;
+            border-radius: 10px;
+        }
+
+        .controls-panel h3,
+        .plots-panel h3 {
+            margin-top: 0;
+        }
+
+        .slider-box {
+            margin-bottom: 22px;
+        }
+
+        .slider-box label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .slider-box input {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .value {
+            display: block;
+            margin-top: 6px;
+            color: #5b3da8;
+            font-weight: bold;
+        }
+
+        .plots-panel {
+            min-width: 0;
+        }
+
+        .graph {
+            width: 100%;
+            min-height: 340px;
+            margin-bottom: 18px;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .result-box {
+            background: #f4f1fb;
+            padding: 15px;
+            border-radius: 9px;
+            text-align: center;
+        }
+
+        .result-box strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #5b3da8;
+        }
+
+        .result-box span {
+            font-size: 19px;
+            font-weight: bold;
+        }
+
+        .button {
+            background: rgb(19, 5, 64);
+            color: white;
+            border: none;
+            padding: 11px 16px;
+            border-radius: 7px;
+            cursor: pointer;
+            margin: 5px 4px 5px 0;
+            font-size: 14px;
+        }
+
+        .button:hover {
+            background: #50328f;
+        }
+
+        .info {
+            background: #f4f1fb;
+            padding: 15px;
+            border-left: 4px solid #7654bd;
+            border-radius: 6px;
+            line-height: 1.6;
+        }
+
+        .equation {
+            background: #faf9fd;
+            padding: 12px;
+            border-radius: 7px;
+            margin: 10px 0;
+            font-family: "Times New Roman", serif;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .two-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+        }
+
+        .matrix-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-family: "Times New Roman", serif;
+            font-size: 18px;
+            margin: 12px 0;
+        }
+
+        .matrix {
+            border-left: 2px solid #24164d;
+            border-right: 2px solid #24164d;
+            border-radius: 6px;
+            padding: 4px 10px;
+        }
+
+        .matrix td {
+            padding: 4px 10px;
+            text-align: center;
+            min-width: 70px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table.check {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        table.check th,
+        table.check td {
+            border-bottom: 1px solid #ddd6f0;
+            padding: 10px 8px;
+        }
+
+        table.check th {
+            background: #f4f1fb;
+            color: #5b3da8;
+        }
+
+        .predict label {
+            display: block;
+            margin: 6px 0;
+            cursor: pointer;
+        }
+
+        a {
+            color: #d8cdf7;
+        }
+
+        @media (max-width: 750px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .results {
+                grid-template-columns: 1fr;
+            }
+
+            .two-cols {
+                grid-template-columns: 1fr;
+            }
+
+            .module {
+                padding: 17px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Page header -->
+    <div class="top">
+        <h1>Dynamic Characteristics Toolkit</h1>
+        <p>Module 3: Second-Order Response</p>
+        <p><a href="module2.html">Back to Module 2</a></p>
+    </div>
+
+    <div class="page">
+
+        <!-- Introduction -->
+        <div class="module">
+            <h2>Second-Order Response</h2>
+
+            <p>
+                This module shows how a second-order system (a mass-spring-damper, or an accelerometer)
+                responds to a step input. Change the mass, damper and spring and watch how the response,
+                the poles and the state-space model change together.
+            </p>
+
+            <div class="equation">
+                G(s) = K ωn² / (s² + 2ζωn s + ωn²)
+            </div>
+
+            <div class="equation">
+                ωn = √(k / m) &nbsp;&nbsp;&nbsp; ζ = b / (2√(k m)) &nbsp;&nbsp;&nbsp; K = 1 / k
+            </div>
+
+            <div class="info">
+                <strong>Important:</strong>
+                The damping ratio ζ decides the shape of the response:
+                ζ &lt; 1 oscillates (underdamped), ζ = 1 is the fastest response without overshoot
+                (critically damped), and ζ &gt; 1 is slow with no overshoot (overdamped).
+            </div>
+        </div>
+
+        <!-- Predict then check -->
+        <div class="module">
+            <h2>Predict, then check</h2>
+
+            <div class="info predict">
+                <strong>Before you touch the sliders, guess:</strong>
+                <p>
+                    The mass m and the spring k stay fixed, and you <u>decrease</u> the damper b
+                    (less damping). What happens to the overshoot?
+                </p>
+
+                <label><input type="radio" name="pred" value="up"> The overshoot increases</label>
+                <label><input type="radio" name="pred" value="down"> The overshoot decreases</label>
+                <label><input type="radio" name="pred" value="same"> The overshoot stays the same</label>
+
+                <button class="button" onclick="checkPrediction()">Check my answer</button>
+                <p id="predResult"></p>
+            </div>
+        </div>
+
+        <!-- Main controls and step response -->
+        <div class="module">
+            <h2>1. Interactive Step Response</h2>
+
+            <div class="layout">
+
+                <!-- System controls -->
+                <div class="controls-panel">
+                    <h3>System Controls</h3>
+
+                    <div class="slider-box">
+                        <label for="mass">Mass (m) - kg</label>
+                        <input type="range" id="mass"
+                               min="0.1" max="5" step="0.1" value="1">
+                        <span class="value" id="massValue">1.0 kg</span>
+                    </div>
+
+                    <div class="slider-box">
+                        <label for="damping">Damper (b) - N·s/m</label>
+                        <input type="range" id="damping"
+                               min="0.1" max="10" step="0.1" value="2">
+                        <span class="value" id="dampingValue">2.0 N·s/m</span>
+                    </div>
+
+                    <div class="slider-box">
+                        <label for="spring">Spring (k) - N/m</label>
+                        <input type="range" id="spring"
+                               min="0.5" max="20" step="0.5" value="4">
+                        <span class="value" id="springValue">4.0 N/m</span>
+                    </div>
+
+                    <div class="slider-box">
+                        <label for="amplitude">Step Force (F₀) - N</label>
+                        <input type="range" id="amplitude"
+                               min="0.5" max="5" step="0.5" value="1">
+                        <span class="value" id="amplitudeValue">1.0 N</span>
+                    </div>
+
+                    <button class="button" onclick="setPreset(1, 2, 4)">
+                        Validation Example (ζ = 0.5)
+                    </button>
+
+                    <button class="button" onclick="setPreset(1, 4, 4)">
+                        Critically damped (ζ = 1)
+                    </button>
+
+                    <button class="button" onclick="setPreset(1, 6, 4)">
+                        Overdamped (ζ = 1.5)
+                    </button>
+
+                    <button class="button" onclick="resetControls()">
+                        Reset
+                    </button>
+                </div>
+
+                <!-- Step response graph -->
+                <div class="plots-panel">
+                    <h3>Step Response x(t)</h3>
+                    <div id="stepGraph" class="graph"></div>
+                </div>
+
+            </div>
+
+            <!-- Calculated results, all read from the plotted curve -->
+            <div class="results">
+
+                <div class="result-box">
+                    <strong>Natural Frequency (ωn)</strong>
+                    <span id="wnResult">-</span>
+                </div>
+
+                <div class="result-box">
+                    <strong>Damping Ratio (ζ)</strong>
+                    <span id="zetaResult">-</span>
+                </div>
+
+                <div class="result-box">
+                    <strong>Damping Type</strong>
+                    <span id="typeResult">-</span>
+                </div>
+
+                <div class="result-box">
+                    <strong>Final Value (K·F₀)</strong>
+                    <span id="finalResult">-</span>
+                </div>
+
+                <div class="result-box">
+                    <strong>Rise Time (10% to 90%)</strong>
+                    <span id="riseResult">-</span>
+                </div>
+
+                <div class="result-box">
+                    <strong>Peak Time</strong>
+                    <span id="peakResult">-</span>
+                </div>
+
+                <div class="result-box">
+                    <strong>Overshoot</strong>
+                    <span id="overshootResult">-</span>
+                </div>
+
+                <div class="result-box">
+                    <strong>Settling Time (2%)</strong>
+                    <span id="settlingResult">-</span>
+                </div>
+
+                <div class="result-box">
+                    <strong>Static Gain (K)</strong>
+                    <span id="kResult">-</span>
+                </div>
+
+            </div>
+
+            <div class="info" style="margin-top: 15px;">
+                Rise time, peak time, overshoot and settling time are measured directly from the plotted
+                curve (the markers on the graph show where they are read). The settling time is the last
+                moment the curve is outside the ±2% band around the final value.
+            </div>
+        </div>
+
+        <!-- Poles in the s-plane -->
+        <div class="module">
+            <h2>2. Poles in the s-plane</h2>
+
+            <p>
+                The poles are the roots of s² + 2ζωn s + ωn² = 0. Poles on the left side mean the system is stable.
+                The farther the poles are from the imaginary axis, the faster the response dies out.
+                The farther they are above and below the real axis, the faster it oscillates.
+            </p>
+
+            <div id="sGraph" class="graph" style="min-height: 380px;"></div>
+
+            <div class="results" style="grid-template-columns: repeat(2, 1fr);">
+                <div class="result-box">
+                    <strong>Poles (from ζ and ωn)</strong>
+                    <span id="polesResult">-</span>
+                </div>
+
+                <div class="result-box">
+                    <strong>Eigenvalues of A (state-space)</strong>
+                    <span id="eigResult">-</span>
+                </div>
+            </div>
+
+            <div class="info" style="margin-top: 15px;" id="matchResult">-</div>
+        </div>
+
+        <!-- State-space panel -->
+        <div class="module">
+            <h2>3. State-Space Model of the Same System</h2>
+
+            <p>
+                Choose the states x₁ = x (displacement) and x₂ = ẋ (velocity). The same mass-spring-damper becomes
+                a first-order matrix equation. The matrices update live when you move the m, b and k sliders.
+            </p>
+
+            <div class="equation">
+                ẋ = A x + B F(t), &nbsp;&nbsp; y = C x
+            </div>
+
+            <div class="matrix-row">
+                <span>A =</span>
+                <span id="matrixA"></span>
+                <span>&nbsp;&nbsp; B =</span>
+                <span id="matrixB"></span>
+                <span>&nbsp;&nbsp; C =</span>
+                <span id="matrixC"></span>
+            </div>
+
+            <h3>Phase plane (x₁, x₂) during the step response</h3>
+            <div id="phaseGraph" class="graph" style="min-height: 380px;"></div>
+
+            <div class="info">
+                <strong>Remember:</strong>
+                An underdamped system (ζ &lt; 1) spirals into its final point. An overdamped or critically
+                damped system (ζ ≥ 1) goes there without spiraling. This path is computed with a
+                4th-order Runge-Kutta (RK4) solver of the state equations, and the dotted line on the
+                step response above comes from the same solver, so you can compare it with the formula.
+            </div>
+        </div>
+
+        <!-- Validation calculations -->
+        <div class="module">
+            <h2>4. Validation Checks</h2>
+
+            <p>
+                These checks run on their own (they do not depend on the sliders) and compare the toolkit
+                with the expected results from the lecture slides.
+            </p>
+
+            <div class="table-wrap">
+                <table class="check">
+                    <tr>
+                        <th>Check</th>
+                        <th>Expected</th>
+                        <th>My value</th>
+                        <th>Result</th>
+                    </tr>
+                    <tr>
+                        <td>4. Overshoot at ζ = 0.5</td>
+                        <td>16.3%</td>
+                        <td id="v4a">-</td>
+                        <td id="v4aS">-</td>
+                    </tr>
+                    <tr>
+                        <td>5. Overshoot at ζ = 1</td>
+                        <td>0% (no overshoot)</td>
+                        <td id="v5a">-</td>
+                        <td id="v5aS">-</td>
+                    </tr>
+                    <tr>
+                        <td>6. Eigenvalues of A at m=1, b=2, k=4</td>
+                        <td>−1 ± j1.732</td>
+                        <td id="v6a">-</td>
+                        <td id="v6aS">-</td>
+                    </tr>
+                    <tr>
+                        <td>6. Eigenvalues equal the poles</td>
+                        <td>equal</td>
+                        <td id="v6b">-</td>
+                        <td id="v6bS">-</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Explanation -->
+        <div class="module">
+            <h2>5. Understanding the Results</h2>
+
+            <p><strong>Underdamped step response (ζ &lt; 1):</strong></p>
+            <div class="equation">
+                y(t) = K [ 1 − e<sup>−ζωn t</sup> / √(1−ζ²) · sin(ωd t + φ) ]
+            </div>
+            <div class="equation">
+                ωd = ωn √(1−ζ²) &nbsp;&nbsp; φ = cos⁻¹(ζ)
+            </div>
+
+            <p><strong>Critically damped (ζ = 1):</strong></p>
+            <div class="equation">
+                y(t) = K [ 1 − (1 + ωn t) e<sup>−ωn t</sup> ]
+            </div>
+
+            <p><strong>Overdamped (ζ &gt; 1):</strong></p>
+            <div class="equation">
+                y(t) = K [ 1 + (s₂ e<sup>s₁t</sup> − s₁ e<sup>s₂t</sup>) / (s₁ − s₂) ]
+            </div>
+            <div class="equation">
+                s₁,₂ = −ζωn ± ωn √(ζ²−1)
+            </div>
+
+            <p><strong>Overshoot and peak time (underdamped):</strong></p>
+            <div class="equation">
+                Overshoot = e<sup>−πζ / √(1−ζ²)</sup> × 100% &nbsp;&nbsp; tp = π / ωd
+            </div>
+
+            <div class="info">
+                <strong>Remember:</strong>
+                The overshoot depends only on ζ. The speed of the response depends on ωn.
+                Larger ζ gives less overshoot but a slower response.
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Connect the JavaScript file -->
+    <script src="module3.js"></script>
+
+</body>
+</html>
