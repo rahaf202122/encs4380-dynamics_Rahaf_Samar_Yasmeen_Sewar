@@ -242,6 +242,12 @@
                 padding: 17px;
             }
         }
+    
+        /* navigation bar (same on every page) */
+        .site-nav { background: #2a1a66; display: flex; flex-wrap: wrap; justify-content: center; }
+        .site-nav a { color: #ded8f2; text-decoration: none; padding: 12px 16px; font-weight: bold; font-family: Arial, sans-serif; }
+        .site-nav a:hover { background: #50328f; color: white; }
+        .site-nav a.active { background: #f4f2fa; color: rgb(19, 5, 64); }
     </style>
 </head>
 
@@ -251,8 +257,15 @@
     <div class="top">
         <h1>Dynamic Characteristics Toolkit</h1>
         <p>Module 3: Second-Order Response</p>
-        <p><a href="module2.html">Back to Module 2</a></p>
     </div>
+
+    <!-- Navigation between the modules -->
+    <nav class="site-nav">
+        <a href="index.html">Module 1: Time Response</a>
+        <a href="module2.html">Module 2: Frequency Response</a>
+        <a href="module3.html" class="active">Module 3: Second Order</a>
+        <a href="module4.html">Module 4: Guess the Sensor</a>
+    </nav>
 
     <div class="page">
 
