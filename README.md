@@ -5,7 +5,7 @@ Interactive Dynamic Characteristics Toolkit
 Our Dynamic Characteristics Interactive Toolkit is deployed on GitHub Pages and can be accessed from desktop and mobile devices.
 
 Live Website:
-https://rahaf202122.github.io/encs4380-dynamics_Rahaf_Samar_Yasmeen_Sewar/
+(well be added later)
 
 Modules
 
