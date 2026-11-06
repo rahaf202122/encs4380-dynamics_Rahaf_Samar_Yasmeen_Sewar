@@ -386,8 +386,32 @@ function showMatrices(m, b, k) {
 // 6. Graphs
 // ------------------------------------------------------------
 
+// Layout settings that depend on the screen size (phone or computer).
+// On a phone the legend becomes a tall column, so the figure needs more room.
+function screenSettings(legendEntries) {
+    const narrow = window.innerWidth < 700;
+    const bottom = narrow ? 90 + 24 * legendEntries : 120;
+    return {
+        bottom: bottom,
+        height: narrow ? 300 + bottom : undefined,
+        titleSize: narrow ? 14 : 17
+    };
+}
+
+// Legend at the bottom of the figure, under the axis title
+const legendBelow = {
+    orientation: "h",
+    yref: "container",
+    y: 0,
+    yanchor: "bottom"
+};
+
+// No toolbar icons (they cover the title on a phone)
+const plotConfig = { responsive: true, displayModeBar: false };
+
 // Step response with the measured points marked on the curve
 function drawStepGraph(sys, F0, data, metrics, sim) {
+    const screen = screenSettings(7);
 
     const finalValue = sys.K * F0;
     const t = data.t;
@@ -474,19 +498,21 @@ function drawStepGraph(sys, F0, data, metrics, sim) {
     }
 
     const layout = {
-        title: "Step Response of the Mass-Spring-Damper",
+        title: { text: "Step Response of the Mass-Spring-Damper", font: { size: screen.titleSize } },
         xaxis: { title: "Time (seconds)" },
         yaxis: { title: "Displacement x (m)" },
-        legend: { orientation: "h", y: -0.35, yanchor: "top" },
-        margin: { t: 50, l: 65, r: 20, b: 120 }
+        legend: legendBelow,
+        height: screen.height,
+        margin: { t: 50, l: 65, r: 20, b: screen.bottom }
     };
 
-    Plotly.newPlot("stepGraph", traces, layout, { responsive: true });
+    Plotly.newPlot("stepGraph", traces, layout, plotConfig);
 }
 
 
 // Poles and eigenvalues in the s-plane
 function drawSPlane(poles, eigenvalues) {
+    const screen = screenSettings(2);
 
     // Size of the plot depends on the farthest pole
     let radius = 0;
@@ -535,20 +561,22 @@ function drawSPlane(poles, eigenvalues) {
     };
 
     const layout = {
-        title: "s-plane: Poles and Eigenvalues",
+        title: { text: "s-plane: Poles and Eigenvalues", font: { size: screen.titleSize } },
         xaxis: { title: "Real part (σ)", range: [-1.4 * radius, 0.4 * radius], zeroline: false },
         yaxis: { title: "Imaginary part (jω)", range: [-radius, radius], zeroline: false },
-        legend: { orientation: "h", y: -0.35, yanchor: "top" },
-        margin: { t: 50, l: 65, r: 20, b: 120 }
+        legend: legendBelow,
+        height: screen.height,
+        margin: { t: 50, l: 65, r: 20, b: screen.bottom }
     };
 
     Plotly.newPlot("sGraph", [imaginaryAxis, realAxis, poleTrace, eigTrace],
-        layout, { responsive: true });
+        layout, plotConfig);
 }
 
 
 // Phase plane: position x1 against velocity x2
 function drawPhasePlane(sys, F0, sim) {
+    const screen = screenSettings(3);
 
     const path = {
         x: sim.x1,
@@ -575,14 +603,15 @@ function drawPhasePlane(sys, F0, sim) {
     };
 
     const layout = {
-        title: "Phase Plane during the Step Response",
+        title: { text: "Phase Plane during the Step Response", font: { size: screen.titleSize } },
         xaxis: { title: "Displacement x₁ (m)" },
         yaxis: { title: "Velocity x₂ (m/s)" },
-        legend: { orientation: "h", y: -0.35, yanchor: "top" },
-        margin: { t: 50, l: 65, r: 20, b: 120 }
+        legend: legendBelow,
+        height: screen.height,
+        margin: { t: 50, l: 65, r: 20, b: screen.bottom }
     };
 
-    Plotly.newPlot("phaseGraph", [path, start, end], layout, { responsive: true });
+    Plotly.newPlot("phaseGraph", [path, start, end], layout, plotConfig);
 }
 
 
