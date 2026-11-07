@@ -1,354 +1,500 @@
-
-// Get the controls from the HTML page
-const gainSlider = document.getElementById("gain");
-const tauSlider = document.getElementById("tau");
-const frequencySlider = document.getElementById("frequency");
-const amplitudeSlider = document.getElementById("amplitude");
-
-
-// Update the page whenever a slider value changes
-gainSlider.addEventListener("input", update);
-tauSlider.addEventListener("input", update);
-frequencySlider.addEventListener("input", update);
-amplitudeSlider.addEventListener("input", update);
+// Get HTML elements
+const kSlider = document.getElementById("kSlider");
+const tauSlider = document.getElementById("tauSlider");
+const frequencySlider = document.getElementById("frequencySlider");
+const omegaSlider = document.getElementById("omega");
+const amplitudeSlider = document.getElementById("amplitudeSlider");
 
 
-// Convert radians to degrees
-function toDegrees(radians) {
-    return radians * (180 / Math.PI);
-}
-
-
-// Main function: calculate the response and update all graphs
+// Main function to update calculations and graphs
 function update() {
 
-    // Read the current values from the sliders
-    const K = Number(gainSlider.value);
+    // Read values from sliders
+    const K = Number(kSlider.value);
     const tau = Number(tauSlider.value);
-    const frequency = Number(frequencySlider.value);
+    const omega = Number(omegaSlider.value);
+    const frequency = omega / (2 * Math.PI);
     const A = Number(amplitudeSlider.value);
 
-    // Convert frequency from Hz to angular frequency in rad/s
-    const omega = 2 * Math.PI * frequency;
+    // Keep the frequency slider synchronized with omega
+    frequencySlider.value = frequency.toFixed(3);
 
-    // Calculate the amplitude ratio
+    // Calculate amplitude ratio
     const M = 1 / Math.sqrt(1 + Math.pow(omega * tau, 2));
 
-    // Calculate the phase angle in radians
-    const phaseRadians = -Math.atan(omega * tau);
+    // Calculate phase lag in radians
+    const phaseRadians = Math.atan(omega * tau);
 
-    // Convert the phase angle to degrees
-    const phaseDegrees = toDegrees(phaseRadians);
+    // Convert phase lag to degrees
+    const phaseDegrees = phaseRadians * 180 / Math.PI;
 
-    // Calculate the dynamic error
+    // Calculate dynamic error
     const dynamicError = M - 1;
 
-    // Calculate the cutoff angular frequency
+    // Calculate cutoff angular frequency
     const cutoffFrequency = 1 / tau;
 
-    // Calculate the output amplitude
+    // Calculate output amplitude
     const outputAmplitude = K * A * M;
 
 
-    // Display the current slider values
-    document.getElementById("gainValue").textContent = K.toFixed(2);
-    document.getElementById("tauValue").textContent = tau.toFixed(3) + " s";
-    document.getElementById("frequencyValue").textContent = frequency.toFixed(2) + " Hz";
-    document.getElementById("amplitudeValue").textContent = A.toFixed(2);
+    // Update slider values
+    document.getElementById("kValue").textContent =
+        K.toFixed(1);
+
+    document.getElementById("tauValue").textContent =
+        tau.toFixed(2);
+
+    document.getElementById("frequencyValue").textContent =
+        frequency.toFixed(3) + " Hz";
+
+    document.getElementById("omegaControlValue").textContent =
+        omega.toFixed(3) + " rad/s";
+
+    document.getElementById("amplitudeValue").textContent =
+        A.toFixed(1);
 
 
-    // Display the calculated results
-    document.getElementById("mResult").textContent = M.toFixed(4);
-    document.getElementById("phaseResult").textContent = phaseDegrees.toFixed(2) + "°";
+    // Update calculated results
+    document.getElementById("mResult").textContent =
+        M.toFixed(4);
+
+    document.getElementById("phaseResult").textContent =
+        phaseDegrees.toFixed(2) + "°";
+
     document.getElementById("errorResult").textContent =
-        dynamicError.toFixed(4) + " (" + (dynamicError * 100).toFixed(2) + "%)";
+        dynamicError.toFixed(4);
+
     document.getElementById("cutoffResult").textContent =
         cutoffFrequency.toFixed(2) + " rad/s";
+
     document.getElementById("omegaResult").textContent =
-        omega.toFixed(2) + " rad/s";
+        omega.toFixed(3) + " rad/s";
+
     document.getElementById("outputAmplitudeResult").textContent =
         outputAmplitude.toFixed(4);
-    
-    
-    // Validation: maximum time constant at 100 Hz
-    // The amplitude ratio must be at least 0.95
-    const validationFrequency = 100;
-    const minimumM = 0.95;
-
-    // Calculate the maximum allowed tau
-    const maxTau = Math.sqrt(
-        (1 / Math.pow(minimumM, 2)) - 1
-    ) / (2 * Math.PI * validationFrequency);
-
-    // Calculate the phase lag at 50 Hz using the maximum tau
-    const phaseAt50Hz = toDegrees(
-        -Math.atan(2 * Math.PI * 50 * maxTau)
-    );
-
-    // Display the validation results
-    document.getElementById("maxTauResult").textContent =
-        (maxTau * 1000).toFixed(3) + " ms";
-
-    document.getElementById("phase50Result").textContent =
-        Math.abs(phaseAt50Hz).toFixed(2) + "° lag";
 
 
-    // Draw the sine wave graph
-    drawSineGraph(K, tau, omega, A, M, phaseRadians);
+    // Draw input and output sine waves
+    drawSineGraph(omega, A, phaseRadians, outputAmplitude);
 
-    // Draw the Bode magnitude and phase graphs
-    drawBodeGraphs(tau, omega);
+    // Draw Bode plots
+    drawBodeGraphs(tau);
 }
 
 
-// Draw the input and output sine waves
-function drawSineGraph(K, tau, omega, A, M, phaseRadians) {
+// Draw input and output signals
+function drawSineGraph(omega, A, phaseRadians, outputAmplitude) {
 
-    // Arrays used to store time and signal values
     const time = [];
     const inputSignal = [];
     const outputSignal = [];
 
-    // Show four complete periods of the input signal
-    const period = 1 / (omega / (2 * Math.PI));
-    const totalTime = 4 * period;
-    const numberOfPoints = 500;
+    // Calculate the period
+    const period = (2 * Math.PI) / omega;
 
-    // Calculate the input and output signals at each time point
-    for (let i = 0; i <= numberOfPoints; i++) {
+    // Generate time values for three periods
+    for (let i = 0; i <= 500; i++) {
 
-        const t = (i / numberOfPoints) * totalTime;
-
-        // Input signal: x(t) = A sin(ωt)
-        const input = A * Math.sin(omega * t);
-
-        // Output signal: y(t) = KAM sin(ωt + φ)
-        const output = K * A * M * Math.sin(omega * t + phaseRadians);
+        const t = (i / 500) * (3 * period);
 
         time.push(t);
+
+        // Input sine wave
+        const input = A * Math.sin(omega * t);
+
+        // Output sine wave
+        const output = outputAmplitude *
+            Math.sin(omega * t - phaseRadians);
+
         inputSignal.push(input);
         outputSignal.push(output);
     }
 
-    // Create the input signal line
-    const inputTrace = {
-        x: time,
-        y: inputSignal,
-        mode: "lines",
-        name: "Input Signal",
-        line: {
-            color: "#7654bd",
-            width: 2
-        }
-    };
 
-    // Create the output signal line
-    const outputTrace = {
-        x: time,
-        y: outputSignal,
-        mode: "lines",
-        name: "Output Signal",
-        line: {
-            color: "#e18a38",
-            width: 2
-        }
-    };
+    const data = [
 
-    // Set the graph title and axis labels
+        {
+            x: time,
+            y: inputSignal,
+            type: "scatter",
+            mode: "lines",
+            name: "Input Signal",
+            line: {
+                color: "blue",
+                width: 2
+            }
+        },
+
+        {
+            x: time,
+            y: outputSignal,
+            type: "scatter",
+            mode: "lines",
+            name: "Output Signal",
+            line: {
+                color: "red",
+                width: 2
+            }
+        }
+
+    ];
+
+
     const layout = {
-        title: "Input vs Output Sine Waves",
+
+        title: "Input and Output Sine Waves",
+
         xaxis: {
             title: "Time (seconds)"
         },
+
         yaxis: {
             title: "Amplitude"
         },
+
         legend: {
             orientation: "h"
-        },
-        margin: {
-            t: 50,
-            l: 55,
-            r: 20,
-            b: 55
         }
+
     };
 
-    // Display the graph inside the HTML element
-    Plotly.newPlot("sineGraph", [inputTrace, outputTrace], layout,
-        { responsive: true });
+
+    Plotly.react("sineGraph", data, layout, {
+        responsive: true
+    });
+
 }
 
 
-// Draw the Bode magnitude and phase graphs
-function drawBodeGraphs(tau, currentOmega) {
+// Draw magnitude and phase Bode plots
+function drawBodeGraphs(tau) {
 
-    // Arrays used for the frequency values and calculated results
     const frequencies = [];
     const magnitudes = [];
     const phases = [];
 
-    // Generate frequencies from 0.1 to 1000 rad/s on a logarithmic scale
-    const minFrequency = 0.1;
-    const maxFrequency = 1000;
-    const numberOfPoints = 300;
+    // Calculate cutoff angular frequency
+    const cutoffFrequency = 1 / tau;
 
-    for (let i = 0; i < numberOfPoints; i++) {
 
-        // Logarithmic frequency spacing
-        const logFrequency =
-            Math.log10(minFrequency) +
-            (i / (numberOfPoints - 1)) *
-            (Math.log10(maxFrequency) - Math.log10(minFrequency));
+    // Generate angular frequency values
+    for (let i = 0; i <= 300; i++) {
 
-        const omega = Math.pow(10, logFrequency);
-
-        // Calculate the amplitude ratio at this frequency
-        const M = 1 / Math.sqrt(1 + Math.pow(omega * tau, 2));
-
-        // Calculate the phase angle in degrees
-        const phase = toDegrees(-Math.atan(omega * tau));
+        const omega = Math.pow(10, -2 + i * 0.02);
 
         frequencies.push(omega);
+
+        // Calculate magnitude ratio
+        const M = 1 / Math.sqrt(
+            1 + Math.pow(omega * tau, 2)
+        );
+
         magnitudes.push(M);
+
+        // Calculate phase in degrees
+        const phase =
+            -Math.atan(omega * tau) * 180 / Math.PI;
+
         phases.push(phase);
+
     }
 
 
-    // Magnitude response trace
-    const magnitudeTrace = {
-        x: frequencies,
-        y: magnitudes,
-        mode: "lines",
-        name: "Magnitude Ratio",
-        line: {
-            color: "#7654bd",
-            width: 3
+    // Magnitude plot
+    const magnitudeData = [
+
+        {
+            x: frequencies,
+            y: magnitudes,
+            type: "scatter",
+            mode: "lines",
+            name: "Magnitude Ratio",
+            line: {
+                color: "blue",
+                width: 2
+            }
+        },
+
+        {
+            x: [cutoffFrequency],
+            y: [1 / Math.sqrt(2)],
+            type: "scatter",
+            mode: "markers",
+            name: "Cutoff Point",
+            marker: {
+                color: "red",
+                size: 10
+            }
         }
-    };
 
-    // Mark the current input frequency on the magnitude graph
-    const currentM = 1 / Math.sqrt(1 + Math.pow(currentOmega * tau, 2));
+    ];
 
-    const currentMagnitudePoint = {
-        x: [currentOmega],
-        y: [currentM],
-        mode: "markers",
-        name: "Current Frequency",
-        marker: {
-            color: "#e18a38",
-            size: 10
-        }
-    };
 
-    // Magnitude graph layout
     const magnitudeLayout = {
-        title: "Bode Magnitude Plot",
+
+        title: "Magnitude Response",
+
         xaxis: {
             title: "Angular Frequency (rad/s)",
             type: "log"
         },
+
         yaxis: {
-            title: "Amplitude Ratio (M)",
-            range: [0, 1.05]
+            title: "Amplitude Ratio (M)"
         },
-        margin: {
-            t: 50,
-            l: 60,
-            r: 20,
-            b: 55
-        }
+
+        shapes: [
+
+            {
+                type: "line",
+                x0: cutoffFrequency,
+                x1: cutoffFrequency,
+                y0: 0,
+                y1: 1,
+                xref: "x",
+                yref: "y",
+                line: {
+                    color: "red",
+                    dash: "dash",
+                    width: 2
+                }
+            }
+
+        ]
+
     };
 
-    Plotly.newPlot(
+
+    Plotly.react(
         "magnitudeGraph",
-        [magnitudeTrace, currentMagnitudePoint],
+        magnitudeData,
         magnitudeLayout,
         { responsive: true }
     );
 
 
-    // Phase response trace
-    const phaseTrace = {
-        x: frequencies,
-        y: phases,
-        mode: "lines",
-        name: "Phase",
-        line: {
-            color: "#e18a38",
-            width: 3
+    // Phase plot
+    const phaseData = [
+
+        {
+            x: frequencies,
+            y: phases,
+            type: "scatter",
+            mode: "lines",
+            name: "Phase Response",
+            line: {
+                color: "green",
+                width: 2
+            }
+        },
+
+        {
+            x: [cutoffFrequency],
+            y: [-45],
+            type: "scatter",
+            mode: "markers",
+            name: "Cutoff Point (-45°)",
+            marker: {
+                color: "red",
+                size: 10
+            }
         }
-    };
 
-    // Calculate the phase at the current input frequency
-    const currentPhase = toDegrees(-Math.atan(currentOmega * tau));
+    ];
 
-    // Mark the current input frequency on the phase graph
-    const currentPhasePoint = {
-        x: [currentOmega],
-        y: [currentPhase],
-        mode: "markers",
-        name: "Current Frequency",
-        marker: {
-            color: "#7654bd",
-            size: 10
-        }
-    };
 
-    // Phase graph layout
     const phaseLayout = {
-        title: "Bode Phase Plot",
+
+        title: "Phase Response",
+
         xaxis: {
             title: "Angular Frequency (rad/s)",
             type: "log"
         },
+
         yaxis: {
-            title: "Phase Angle (degrees)",
-            range: [-95, 5]
+            title: "Phase (degrees)"
         },
-        margin: {
-            t: 50,
-            l: 60,
-            r: 20,
-            b: 55
-        }
+
+        shapes: [
+
+            {
+                type: "line",
+                x0: cutoffFrequency,
+                x1: cutoffFrequency,
+                y0: -90,
+                y1: 0,
+                xref: "x",
+                yref: "y",
+                line: {
+                    color: "red",
+                    dash: "dash",
+                    width: 2
+                }
+            }
+
+        ]
+
     };
 
-    Plotly.newPlot(
+
+    Plotly.react(
         "phaseGraph",
-        [phaseTrace, currentPhasePoint],
+        phaseData,
         phaseLayout,
         { responsive: true }
     );
+
 }
 
 
-// Set the values required by the validation example
+// Display validation result
+function showCheck(id, statusId, actual, expected, tolerance) {
+
+    const valueElement = document.getElementById(id);
+    const statusElement = document.getElementById(statusId);
+
+    valueElement.textContent = actual.toFixed(4);
+
+    if (Math.abs(actual - expected) <= tolerance) {
+
+        statusElement.textContent = "PASS";
+        statusElement.className = "validation-result pass";
+
+    } else {
+
+        statusElement.textContent = "FAIL";
+        statusElement.className = "validation-result fail";
+
+    }
+
+}
+
+
+// Run validation tests
+function runValidation() {
+
+    const tau = 0.2;
+    const omega = 2;
+
+    // Test 1: Amplitude ratio
+    const M = 1 / Math.sqrt(
+        1 + Math.pow(omega * tau, 2)
+    );
+
+    // Test 2: Phase lag
+    const phase = Math.atan(omega * tau) * 180 / Math.PI;
+
+    // Test 3: Dynamic error
+    const dynamicError = M - 1;
+
+    // Test 4: Cutoff frequency
+    const cutoff = 1 / tau;
+
+
+    // Display validation results
+    showCheck("v2a", "v2aS", M, 0.9285, 0.001);
+
+    showCheck("v2b", "v2bS", phase, 21.8014, 0.01);
+
+    showCheck("v2c", "v2cS", dynamicError, -0.0715, 0.001);
+
+    showCheck("v2d", "v2dS", cutoff, 5, 0.001);
+
+
+    // Calculate maximum time constant for 5% error at 100 Hz
+    const maxFrequency = 100;
+
+    const maxTau = Math.sqrt(
+        (1 / Math.pow(0.95, 2)) - 1
+    ) / (2 * Math.PI * maxFrequency);
+
+
+    // Calculate phase at 50 Hz
+    const phase50 = Math.atan(
+        2 * Math.PI * 50 * maxTau
+    ) * 180 / Math.PI;
+
+
+    // Display additional results
+    document.getElementById("maxTauResult").textContent =
+        (maxTau * 1000).toFixed(3) + " ms";
+
+    document.getElementById("phase50Result").textContent =
+        phase50.toFixed(2) + "°";
+
+}
+
+
+// Set validation example values
 function setValidationExample() {
 
-    // For sin(2t), angular frequency is 2 rad/s.
-    // Frequency in Hz = 2 / (2π) ≈ 0.3183 Hz.
-    gainSlider.value = 1;
+    kSlider.value = 1;
     tauSlider.value = 0.2;
-    frequencySlider.value = 2 / (2 * Math.PI);
+
+    // Set angular frequency to 2 rad/s
+    omegaSlider.value = 2;
+
+    // Convert angular frequency to Hz
+    frequencySlider.value = (2 / (2 * Math.PI)).toFixed(3);
+
     amplitudeSlider.value = 1;
 
-    // Recalculate the results and redraw the graphs
     update();
+
 }
 
 
-// Return all controls to their initial values
+// Reset all controls
 function resetControls() {
 
-    gainSlider.value = 1;
+    kSlider.value = 1;
     tauSlider.value = 0.2;
-    frequencySlider.value = 0.32;
+
+    // Reset frequency to 0.5 Hz
+    frequencySlider.value = 0.5;
+
+    // Convert 0.5 Hz to angular frequency
+    omegaSlider.value = (2 * Math.PI * 0.5).toFixed(3);
+
     amplitudeSlider.value = 1;
 
     update();
+
 }
 
 
-// Run the update function when the page first opens
+// Update when gain, time constant, or amplitude changes
+kSlider.addEventListener("input", update);
+tauSlider.addEventListener("input", update);
+amplitudeSlider.addEventListener("input", update);
+
+
+// When frequency in Hz changes, update angular frequency
+frequencySlider.addEventListener("input", function () {
+
+    const frequency = Number(frequencySlider.value);
+
+    omegaSlider.value = (2 * Math.PI * frequency).toFixed(3);
+
+    update();
+
+});
+
+
+// When angular frequency changes, update frequency in Hz
+omegaSlider.addEventListener("input", function () {
+
+    const omega = Number(omegaSlider.value);
+
+    frequencySlider.value = (omega / (2 * Math.PI)).toFixed(3);
+
+    update();
+
+});
+
+
+// Initialize the page
 update();
+runValidation();
