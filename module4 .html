@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Module 4 - Guess the Sensor</title>
+
+    <!-- Plotly library is used to draw the graphs -->
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f2fa;
+            color: #24164d;
+        }
+
+        .top {
+            background: rgb(19, 5, 64);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .top h1 { margin: 0 0 10px; }
+        .top p { margin: 0 0 6px; color: #ded8f2; }
+
+        .page { max-width: 1200px; margin: 25px auto; padding: 0 18px; }
+
+        .module {
+            background: white;
+            padding: 25px;
+            margin-bottom: 22px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+        }
+        .module h2 { margin-top: 0; color: rgb(19, 5, 64); }
+
+        .layout { display: grid; grid-template-columns: 280px 1fr; gap: 22px; }
+
+        .controls-panel { background: #f4f1fb; padding: 18px; border-radius: 10px; }
+        .controls-panel h3, .plots-panel h3 { margin-top: 0; }
+        .plots-panel { min-width: 0; }
+
+        .slider-box { margin-bottom: 18px; }
+        .slider-box label { display: block; font-weight: bold; margin-bottom: 8px; }
+        .slider-box input {
+            width: 100%;
+            padding: 8px;
+            font-size: 15px;
+            border: 1px solid #c9bfe8;
+            border-radius: 6px;
+        }
+
+        .graph { width: 100%; min-height: 340px; margin-bottom: 12px; }
+
+        .results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
+        .result-box { background: #f4f1fb; padding: 15px; border-radius: 9px; text-align: center; }
+        .result-box strong { display: block; margin-bottom: 8px; color: #5b3da8; }
+        .result-box span { font-size: 19px; font-weight: bold; }
+
+        .button {
+            background: rgb(19, 5, 64);
+            color: white;
+            border: none;
+            padding: 11px 16px;
+            border-radius: 7px;
+            cursor: pointer;
+            margin: 5px 4px 5px 0;
+            font-size: 14px;
+        }
+        .button:hover { background: #50328f; }
+        .button:disabled { opacity: 0.4; cursor: default; }
+
+        .info {
+            background: #f4f1fb;
+            padding: 15px;
+            border-left: 4px solid #7654bd;
+            border-radius: 6px;
+            line-height: 1.6;
+        }
+
+        .readout {
+            background: #faf9fd;
+            padding: 10px;
+            border-radius: 7px;
+            margin: 6px 0 12px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .equation {
+            background: #faf9fd;
+            padding: 12px;
+            border-radius: 7px;
+            margin: 10px 0;
+            font-family: "Times New Roman", serif;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .table-wrap { overflow-x: auto; }
+        table.check { width: 100%; border-collapse: collapse; text-align: center; }
+        table.check th, table.check td { border-bottom: 1px solid #ddd6f0; padding: 10px 8px; }
+        table.check th { background: #f4f1fb; color: #5b3da8; }
+
+        a { color: #d8cdf7; }
+
+        @media (max-width: 750px) {
+            .layout { grid-template-columns: 1fr; }
+            .results { grid-template-columns: 1fr; }
+            .module { padding: 17px; }
+        }
+    
+        /* navigation bar (same on every page) */
+        .site-nav { background: #2a1a66; display: flex; flex-wrap: wrap; justify-content: center; }
+        .site-nav a { color: #ded8f2; text-decoration: none; padding: 12px 16px; font-weight: bold; font-family: Arial, sans-serif; }
+        .site-nav a:hover { background: #50328f; color: white; }
+        .site-nav a.active { background: #f4f2fa; color: rgb(19, 5, 64); }
+    </style>
+</head>
+
+<body>
+
+    <!-- Page header -->
+    <div class="top">
+        <h1>Dynamic Characteristics Toolkit</h1>
+        <p>Module 4: Guess the Sensor</p>
+    </div>
+
+    <!-- Navigation between the modules -->
+    <nav class="site-nav">
+        <a href="index.html">Module 1: Time Response</a>
+        <a href="module2.html">Module 2: Frequency Response</a>
+        <a href="module3.html">Module 3: Second Order</a>
+        <a href="module4.html" class="active">Module 4: Guess the Sensor</a>
+    </nav>
+
+    <div class="page">
+
+        <!-- Introduction -->
+        <div class="module">
+            <h2>Read the curve, find the sensor</h2>
+
+            <p>
+                A hidden sensor was chosen at random and its response was measured, with a little noise.
+                Work backwards from the curve, the way an engineer does with a real sensor, and estimate
+                its parameters. Then check your guess.
+            </p>
+
+            <div class="equation">
+                First order: &nbsp; y(t) = K A (1 − e<sup>−t/τ</sup>) &nbsp;&nbsp;&nbsp;
+                Second order: &nbsp; G(s) = K ωn² / (s² + 2ζωn s + ωn²)
+            </div>
+
+            <div class="info">
+                <strong>Tools you have:</strong>
+                hover over any point to read (t, y), and click two points to measure Δt and Δy.
+                For a first-order step, the log-method helper plots ln(1 − y/K) against t,
+                which is a straight line with slope −1/τ.
+            </div>
+        </div>
+
+        <!-- Challenge -->
+        <div class="module">
+            <h2>1. The Challenge</h2>
+
+            <div class="layout">
+
+                <!-- Controls -->
+                <div class="controls-panel">
+                    <h3>Predict, then check: your guess</h3>
+                    <p id="taskText" style="font-size: 14px; line-height: 1.5;"></p>
+
+                    <div id="inputs"></div>
+
+                    <button class="button" id="submitBtn" onclick="submitGuess()">Check my guess</button>
+                    <button class="button" onclick="showHint()">Hint</button>
+                    <button class="button" onclick="newSensor()">New sensor</button>
+
+                    <p id="hintText" style="font-style: italic; font-size: 14px;"></p>
+                    <p id="msgText" style="font-weight: bold; font-size: 14px;"></p>
+                </div>
+
+                <!-- Plots -->
+                <div class="plots-panel">
+                    <h3>Measured response</h3>
+                    <div id="mainGraph" class="graph"></div>
+                    <div id="readout" class="readout">Click a point on the curve to place marker 1, then another for marker 2.</div>
+
+                    <div id="logBox">
+                        <h3>Log-method helper</h3>
+                        <div class="slider-box">
+                            <label for="kEstimate">Your estimate of K (final value)</label>
+                            <input type="number" id="kEstimate" step="any" placeholder="e.g. 2.5" oninput="drawLogGraph()">
+                        </div>
+                        <div id="logGraph" class="graph"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Reveal -->
+        <div class="module" id="resultModule" style="display: none;">
+            <h2>2. The Reveal</h2>
+            <p>The green line is the true response. The red dashed line is the response of your guess.</p>
+            <div class="table-wrap">
+                <table class="check">
+                    <thead>
+                        <tr><th>Parameter</th><th>True value</th><th>Your guess</th><th>Error</th><th>Points</th></tr>
+                    </thead>
+                    <tbody id="resultTable"></tbody>
+                </table>
+            </div>
+            <div class="results" style="grid-template-columns: 1fr;">
+                <div class="result-box">
+                    <strong>Round score</strong>
+                    <span id="roundScore">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Score -->
+        <div class="module">
+            <h2>Session score</h2>
+            <div class="results">
+                <div class="result-box"><strong>Rounds played</strong><span id="roundsResult">0</span></div>
+                <div class="result-box"><strong>Total points</strong><span id="totalResult">0</span></div>
+                <div class="result-box"><strong>Average per round</strong><span id="avgResult">-</span></div>
+            </div>
+            <div class="info" style="margin-top: 15px;">
+                A guess within 10% of the true value gets full marks (100 points). Beyond 10% the points fall
+                in a straight line and reach 0 at 50% error. The round score is the average over the
+                parameters you estimated.
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Connect the JavaScript file -->
+    <script src="module4.js"></script>
+
+</body>
+</html>
