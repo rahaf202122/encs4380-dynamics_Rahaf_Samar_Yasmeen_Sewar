@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +9,58 @@
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 
     <style>
+
+        /* Navigation between all modules */
+        .site-nav {
+            background: #2a1a66;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0;
+        }
+
+        .site-nav a {
+            color: #ded8f2;
+            text-decoration: none;
+            padding: 13px 18px;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+            transition: 0.3s;
+        }
+
+        .site-nav a:hover {
+            background: #50328f;
+            color: white;
+        }
+        .top {
+            background: rgb(19, 5, 64);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .top h1 {
+            margin: 0 0 10px;
+        }
+
+        .top p {
+            margin: 0 0 6px;
+            color: #ded8f2;
+        }
+
+        .site-nav a.active {
+            background: #f4f2fa;
+            color: rgb(19, 5, 64);
+        }
+
+        @media (max-width: 600px) {
+            .site-nav a {
+                flex: 1 1 50%;
+                text-align: center;
+                padding: 12px 5px;
+                font-size: 13px;
+            }
+        }
+
         * {
             box-sizing: border-box;
         }
@@ -154,10 +207,27 @@
                 padding: 7px;
             }
         }
+
     </style>
 </head>
 
 <body>
+
+    <div class="top">
+        <h1>Dynamic Characteristics Toolkit</h1>
+        <p>Module 2: Frequency Response - First Order Response</p>
+    </div>
+
+
+
+    <nav class="site-nav">
+        <a href="index.html">Module 1</a>
+        <a href="module2.html" class="active">Module 2</a>
+        <a href="module3.html">Module 3</a>
+        <a href="module4.html">Module 4</a>
+    </nav>
+
+
 
 <div class="container">
 
@@ -205,17 +275,17 @@
         </div>
 
         <div class="slider-box">
-    <label for="frequency">Input Frequency (f) - Hz</label>
-    <input type="range" id="frequency" min="0.1" max="10" step="0.001" value="0.318">
-    <span class="value" id="frequencyValue">0.318 Hz</span>
-</div>
+            <label for="frequency">Input Frequency (f) - Hz</label>
+            <input type="range" id="frequency" min="0.1" max="10" step="0.001" value="0.318">
+            <span class="value" id="frequencyValue">0.318 Hz</span>
+        </div>
 
-       <div class="slider-box">
-    <label for="omega">Angular Frequency (ω) - rad/s</label>
-    <input type="range" id="omega"
-           min="0.628" max="62.832" step="0.001" value="2">
-    <span class="value" id="omegaControlValue">2.000 rad/s</span>
-</div>
+        <div class="slider-box">
+            <label for="omega">Angular Frequency (ω) - rad/s</label>
+            <input type="range" id="omega"
+                   min="0.628" max="62.832" step="0.001" value="2">
+            <span class="value" id="omegaControlValue">2.000 rad/s</span>
+        </div>
 
         <button onclick="setValidationExample()">
             Validation Example
