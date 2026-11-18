@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Characteristics Toolkit</title>
+
+<!-- plotting library -->
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f2fa;
+    color: #222;
+  }
+  .top {
+    background: rgb(19, 5, 64);
+    color: white;
+    padding: 25px;
+    text-align: center;
+  }
+  .top h1 { margin: 0; font-size: 1.5rem; }
+  .top p { margin: 4px 0 0 0; }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 15px;
+  }
+
+  .module {
+    background: white;
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  .module h2 { margin-top: 0; color: rgb(19, 5, 64); }
+
+  .formula {
+    font-family: monospace;
+    background: #eee;
+    padding: 3px 6px;
+  }
+
+  .note {
+    background: #eef5ff;
+    border: 1px solid #b8d0ee;
+    padding: 10px;
+    margin: 12px 0;
+  }
+
+  /* controls on the left, plots on the right */
+  .layout {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+  .controls-panel { flex: 1 1 260px; }
+  .plots-panel { flex: 3 1 500px; min-width: 0; }
+
+  .box {
+    border: 1px solid #ccc;
+    background: #fafafa;
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+  .box h3 { margin: 0 0 8px 0; font-size: 1.1rem; }
+
+  .slider-box { margin-bottom: 12px; }
+  .slider-box label { font-weight: bold; }
+  .slider-box input[type=range] { width: 100%; }
+
+  select, button { font-size: 1rem; padding: 4px 8px; margin-top: 5px; }
+  button { cursor: pointer; }
+
+  .graph {
+    width: 100%;
+    height: 330px;
+    border: 1px solid #ddd;
+    margin-bottom: 8px;
+  }
+
+  .results {
+    font-family: monospace;
+    background: #f7f7f7;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+
+  h4 { margin: 10px 0 5px 0; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+  th { background: #e6e6e6; }
+  .pass { color: green; font-weight: bold; }
+  .fail { color: red; font-weight: bold; }
+
+  footer { text-align: center; padding: 10px; color: #666; font-size: 0.9rem; }
+
+        /* navigation bar (same on every page) */
+        .site-nav { background: #2a1a66; display: flex; flex-wrap: wrap; justify-content: center; }
+        .site-nav a { color: #ded8f2; text-decoration: none; padding: 12px 16px; font-weight: bold; font-family: Arial, sans-serif; }
+        .site-nav a:hover { background: #50328f; color: white; }
+        .site-nav a.active { background: #f4f2fa; color: rgb(19, 5, 64); }
+    </style>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet"><link rel="stylesheet" href="lab.css"><link rel="stylesheet" href="palette.css"></head>
+
+<body>
+
+<div class="top">
+  <h1>Dynamic Characteristics Toolkit</h1>
+  <p>ENCS4380 Interfacing Techniques - Homework 1</p>
+</div>
+
+    <!-- Navigation between the modules -->
+    <nav class="site-nav">
+<a href="index.html">MARAI Home</a>
+        <a href="homework1.html" class="active">Module 1: Time Response</a>
+        <a href="module2.html">Module 2: Frequency Response</a>
+        <a href="module3.html">Module 3: Second Order</a>
+        <a href="module4.html">Module 4: Guess the Sensor</a>
+        <a href="p1.html">Control P1: PID Playground</a>
+    </nav>
+
+<div class="page">
+
+  <!-- ================= MODULE 1 ================= -->
+  <div class="module">
+    <h2>Module 1: First-Order Time Response (Thermometer)</h2>
+    <span class="formula">τ·dy/dt + y = K·x &nbsp;&nbsp;→&nbsp;&nbsp; G(s) = K / (τs + 1)</span>
+
+    <div class="note">
+      <b>The idea:</b> a thermometer does not show the new temperature immediately. After a time τ it reaches 63.2% of the final value,
+      and after 3τ it reaches 95%. A smaller τ means a faster sensor.
+    </div>
+
+    <div class="layout">
+
+      <!-- left side: controls -->
+      <div class="controls-panel">
+
+        <div class="box">
+          <h3>Predict, then check</h3>
+          <p id="questionText"></p>
+          <input type="number" id="guess" step="any" placeholder="your answer" style="font-size:1rem;width:130px">
+          <button onclick="checkGuess()">Check</button>
+          <button onclick="newQuestion()">New question</button>
+          <p id="guessResult"></p>
+        </div>
+
+        <div class="box">
+          <h3>Controls</h3>
+
+          <div class="slider-box">
+            <label>Input type:</label><br>
+            <input type="radio" name="inputType" id="stepRadio" checked onchange="update()"> Step
+            &nbsp;
+            <input type="radio" name="inputType" id="rampRadio" onchange="update()"> Ramp
+          </div>
+
+          <div class="slider-box">
+            <label>K (sensitivity) = <span id="kText"></span></label>
+            <input type="range" id="kSlider" min="0.5" max="5" step="0.1" value="1" oninput="update()">
+          </div>
+
+          <div class="slider-box">
+            <label>τ (time constant) = <span id="tauText"></span> s</label>
+            <input type="range" id="tauSlider" min="0.5" max="20" step="0.5" value="10" oninput="update()">
+          </div>
+
+          <div class="slider-box">
+            <label id="aLabel">A (step size)</label> = <span id="aText"></span>
+            <input type="range" id="aSlider" min="1" max="100" step="1" value="60" oninput="update()">
+          </div>
+
+          <button onclick="teaExample()">Lecture example: tea at 80°C</button>
+          <p id="teaText" style="font-size:0.9rem"></p>
+        </div>
+      </div>
+
+      <!-- right side: plots -->
+      <div class="plots-panel">
+        <h4>Sensor output y(t)</h4>
+        <div id="graph1" class="graph"></div>
+        <div id="results" class="results"></div>
+
+        <h4 id="graph2Title"></h4>
+        <p id="graph2Note" style="margin:0"></p>
+        <div id="graph2" class="graph"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= VALIDATION ================= -->
+  <div class="module">
+    <h2>Validation Checks</h2>
+    <table>
+      <tr>
+        <th>#</th>
+        <th>Test</th>
+        <th>Expected</th>
+        <th>Our value</th>
+        <th>Result</th>
+      </tr>
+      <tbody id="validationTable"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<footer>ENCS4380 - Birzeit University</footer>
+
+<!-- Connect the JavaScript file -->
+<script src="module1.js"></script>
+
+</body>
+</html>
