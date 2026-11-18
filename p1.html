@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control P1 - PID Playground</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+  body { margin: 0; font-family: Arial, sans-serif; background: #f4f2fa; color: #222; }
+  .top { background: rgb(19, 5, 64); color: white; padding: 25px; text-align: center; }
+  .top h1 { margin: 0; font-size: 1.5rem; }
+  .top p { margin: 4px 0 0 0; }
+  .page { max-width: 1100px; margin: 0 auto; padding: 15px; }
+  .module { background: white; border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; }
+  .module h2 { margin-top: 0; color: rgb(19, 5, 64); }
+  .row { display: flex; flex-wrap: wrap; gap: 10px 18px; }
+  label { display: block; font-size: 14px; min-width: 150px; flex: 1; font-weight: bold; }
+  input[type=range] { width: 100%; }
+  select, button { font-size: 1rem; padding: 4px 8px; margin-top: 5px; cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+  th { background: #e6e6e6; }
+  .pass { color: green; font-weight: bold; }
+  .fail { color: red; font-weight: bold; }
+  #warn { color: red; font-weight: bold; }
+  .predict label { font-weight: normal; margin: 6px 0; cursor: pointer; }
+  .module > svg { max-width: 100%; height: auto; }
+  footer { text-align: center; padding: 10px; color: #666; font-size: 0.9rem; }
+  .site-nav { background: #2a1a66; display: flex; flex-wrap: wrap; justify-content: center; }
+  .site-nav a { color: #ded8f2; text-decoration: none; padding: 12px 16px; font-weight: bold; font-family: Arial, sans-serif; }
+  .site-nav a:hover { background: #50328f; color: white; }
+  .site-nav a.active { background: #f4f2fa; color: rgb(19, 5, 64); }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"><link rel="stylesheet" href="lab.css"><link rel="stylesheet" href="palette.css"></head>
+<body>
+
+<div class="top">
+  <h1>Dynamic Characteristics Toolkit</h1>
+  <p>ENCS4380 Interfacing Techniques - Homework 2: Control P1, PID Playground</p>
+</div>
+
+<nav class="lab-nav"><a href="index.html">MARAI</a><a href="p1.html" aria-current="page">P1 · Playground</a><a href="p2.html" >P2 · Slow sensor</a><a href="p3.html" >P3 · Digital PID</a><a href="p4.html" >P4 · Tuning challenge</a><a href="system.html" >My system</a><a href="bonus.html" >Bonus lab</a></nav>
+
+<div class="page"><aside class="experiment-guide"><h2>Try one change at a time</h2><p>Start with “P · Reference check” and look at where the output stops. Save that response, then choose “PI · Zero step error” to compare. For the second-order example, save “Explore overshoot” before clicking “Add damping”. The dotted curve is the response you saved.</p></aside>
+
+
+<div class="module predict"><h2>Predict, then check</h2>
+<p>With Ki = 0 and Kd = 0, you raise Kp from 1 to 20 on the first-order plant (K = 1). What happens to the steady-state error?</p>
+<label><input type="radio" name="q" value="a"> It shrinks, but never reaches zero</label>
+<label><input type="radio" name="q" value="b"> It reaches exactly zero at some Kp</label>
+<label><input type="radio" name="q" value="c"> It grows</label>
+<button id="chk">Check my answer</button> <span id="qres"></span></div>
+
+<div class="module"><h2>The loop</h2>
+<svg viewBox="0 0 640 110" width="640" role="img" aria-label="Block diagram: setpoint r, summing junction, PID, limit, plant, output y, feedback">
+ <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#2a1a5e"/></marker></defs>
+ <g stroke="#2a1a5e" fill="none" stroke-width="2" marker-end="url(#ar)">
+  <line x1="10" y1="45" x2="58" y2="45"/><line x1="82" y1="45" x2="130" y2="45"/>
+  <line x1="230" y1="45" x2="270" y2="45"/><line x1="350" y1="45" x2="390" y2="45"/>
+  <line x1="500" y1="45" x2="620" y2="45" marker-end="none"/>
+  <path d="M560,45 V95 H70 V57" />
+ </g>
+ <circle cx="70" cy="45" r="12" fill="#fff" stroke="#2a1a5e" stroke-width="2"/><text x="64" y="50" font-size="14">+</text><text x="74" y="68" font-size="12">-</text>
+ <rect x="130" y="25" width="100" height="40" fill="#e9e3ff" stroke="#2a1a5e"/><text x="150" y="50" font-size="14">PID</text>
+ <rect x="270" y="25" width="80" height="40" fill="#fff4d6" stroke="#2a1a5e"/><text x="283" y="50" font-size="13">limit</text>
+ <rect x="390" y="25" width="110" height="40" fill="#e0f4e8" stroke="#2a1a5e"/><text x="420" y="50" font-size="14">Plant</text>
+ <text x="12" y="35" font-size="13">r</text><text x="236" y="38" font-size="13">u</text><text x="590" y="38" font-size="13">y</text>
+</svg></div>
+
+<div class="module"><h2>Controls</h2><div class="preset-bar"><button id="presetP" type="button">P · Reference check</button><button id="presetPI" type="button">PI · Zero step error</button><button id="presetOscillation" type="button">Explore overshoot</button><button id="presetDamping" type="button">Add damping</button></div><div class="preset-bar"><button id="saveComparison" type="button">Save current response</button><button id="clearComparison" type="button">Clear comparison</button><span id="comparisonStatus" role="status"></span></div>
+<div class="row">
+ <label>Plant <select id="ptype"><option value="1">First order (K, &tau;)</option><option value="2">Second order (K, &omega;n, &zeta;)</option></select></label>
+ <label id="g1a">K = <b id="o_K1"></b><input type="range" id="K1" min="0.2" max="5" step="0.1" value="1"></label>
+ <label id="g1b">&tau; = <b id="o_tau"></b> s<input type="range" id="tau" min="0.1" max="5" step="0.1" value="1"></label>
+ <label id="g2a" style="display:none">K = <b id="o_K2"></b><input type="range" id="K2" min="0.2" max="5" step="0.1" value="1"></label>
+ <label id="g2b" style="display:none">&omega;n = <b id="o_wn"></b> rad/s<input type="range" id="wn" min="0.5" max="5" step="0.1" value="1"></label>
+ <label id="g2c" style="display:none">&zeta; = <b id="o_zeta"></b><input type="range" id="zeta" min="0.1" max="2" step="0.05" value="0.5"></label>
+</div><hr>
+<div class="row">
+ <label>Kp = <b id="o_Kp"></b><input type="range" id="Kp" min="0" max="20" step="0.1" value="1"></label>
+ <label>Ki = <b id="o_Ki"></b><input type="range" id="Ki" min="0" max="10" step="0.1" value="0"></label>
+ <label>Kd = <b id="o_Kd"></b><input type="range" id="Kd" min="0" max="5" step="0.05" value="0"></label>
+ <label>Setpoint step r = <b id="o_r"></b><input type="range" id="r" min="0.5" max="5" step="0.5" value="1"></label>
+ <label>Run time = <b id="o_T"></b> s<input type="range" id="T" min="5" max="60" step="5" value="20"></label>
+</div><hr>
+<div class="row">
+ <label><input type="checkbox" id="lim"> Limit the control signal to &plusmn; <b id="o_umax"></b><input type="range" id="umax" min="0.5" max="20" step="0.5" value="10"></label>
+ <label><input type="checkbox" id="aw" checked> Anti-windup (clamping)</label>
+</div></div>
+
+<div class="module"><h2>Response</h2>
+<p class="small">Rise time is measured from 10% to 90% of the estimated final output. Overshoot and the 2% settling band also use that final output. Steady-state error compares the estimated final output with the setpoint. Final output is estimated from the last 10% of the run. Extend the run to check convergence.</p><p id="warn"></p>
+<div id="plotY" style="height:300px"></div><div id="plotU" style="height:220px"></div>
+<table><tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Rise time (10% to 90%)</td><td id="m_rise"></td></tr>
+<tr><td>Overshoot</td><td id="m_os"></td></tr>
+<tr><td>Settling time (2%)</td><td id="m_set"></td></tr>
+<tr><td>Steady-state error</td><td id="m_ess"></td></tr></table></div>
+
+<div class="module"><h2>Validation checks</h2>
+<table id="vt"><tr><th>#</th><th>Test (plant K = 1, &tau; = 1)</th><th>Expected</th><th>Our value</th><th>Result</th></tr></table></div>
+
+
+</div>
+
+<section class="panel" style="max-width:1100px;margin:0 auto 25px"><h2>What P, I and D change</h2><table><tr><th>Term</th><th>Effect to explore</th></tr><tr><td>P · current error</td><td>Often speeds the response. P alone on this first-order plant leaves step error.</td></tr><tr><td>I · accumulated error</td><td>Can remove step error when the loop is stable and the target is achievable. Excessive gain can cause overshoot and windup.</td></tr><tr><td>D · rate of change</td><td>Can add damping. This implementation differentiates a filtered measurement to avoid a setpoint kick.</td></tr></table><p>Try one gain at a time and compare the measured metrics. <a href="bonus.html">Open the bonus experiments →</a></p></section><footer>ENCS4380 - Birzeit University</footer>
+
+<script src="sim.js"></script>
+<script src="metrics.js"></script>
+<script src="p1.js"></script>
+</body>
+</html>
