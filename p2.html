@@ -6,45 +6,6 @@
     <title>P2 - A Slow Sensor in the Loop</title>
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
     <style>
-
-
-
-/* Predict, then check section */
-.prediction-question {
-    margin: 20px 0;
-}
-
-.prediction-question h3 {
-    color: #25205c;
-    font-size: 16px;
-    margin-bottom: 12px;
-}
-
-.prediction-question label {
-    display: block;
-    background: #faf9ff;
-    border: 1px solid #e2def5;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 7px;
-    cursor: pointer;
-    line-height: 1.5;
-}
-
-.prediction-question label:hover {
-    background: #f0efff;
-}
-
-.prediction-question input {
-    accent-color: #5146a5;
-    margin-right: 8px;
-}
-
-.prediction-question input:checked + span {
-    font-weight: bold;
-}
-
-
         * { box-sizing: border-box; }
         body {
             font-family: Arial, sans-serif;
@@ -130,19 +91,16 @@
             .top { padding: 20px 12px; }
         }
     </style>
-</head>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"><link rel="stylesheet" href="lab.css"><link rel="stylesheet" href="palette.css"></head>
 <body>
     <header class="top">
         <h1>Dynamic Characteristics Toolkit</h1>
         <p>Homework 2 — P2: A Slow Sensor in the Loop</p>
     </header>
 
-    <nav class="site-nav">
-        <a href="../index.html">Home</a>
-        <a href="p2.html" class="active">P2: Slow Sensor</a>
-    </nav>
+    <nav class="lab-nav"><a href="index.html">MARAI</a><a href="p1.html" >P1 · Playground</a><a href="p2.html" aria-current="page">P2 · Slow sensor</a><a href="p3.html" >P3 · Digital PID</a><a href="p4.html" >P4 · Tuning challenge</a><a href="system.html" >My system</a><a href="bonus.html" >Bonus lab</a></nav>
 
-    <main class="container">
+    <main class="container"><aside class="experiment-guide"><h2>See what the controller is missing</h2><p>Press Reset Parameters first. The blue line is the real output, and the orange line is the sensor reading. Increase the sensor time constant slowly and watch the gap between them. Then try Slow Sensor Example. Reduce τs to 0.1 s while keeping the other gains unchanged to see why the feedback becomes easier to control.</p></aside>
         <section class="section">
             <h2>What are we investigating?</h2>
             <div class="intro">
@@ -155,6 +113,16 @@
                 The feedback error is calculated from the sensor measurement:
                 <strong>e(t) = r(t) − ym(t)</strong>, not from the true output y(t).
             </p>
+        </section>
+
+        <section class="section" aria-labelledby="predictionTitle">
+            <h2 id="predictionTitle">Predict, then check</h2>
+            <p>With K = 1, τ = 1 s, Kp = 2, Ki = 5 and Kd = 0, what happens when the sensor time constant increases from 0.1 s to 2 s?</p>
+            <label><input type="radio" name="sensorPrediction" value="unstable"> The loop becomes unstable and oscillations grow.</label><br>
+            <label><input type="radio" name="sensorPrediction" value="faster"> The loop settles faster.</label><br>
+            <label><input type="radio" name="sensorPrediction" value="same"> The response stays the same.</label><br>
+            <button id="checkPrediction" type="button">Check my prediction</button>
+            <p id="predictionFeedback" role="status" aria-live="polite"></p>
         </section>
 
         <section class="section">
@@ -199,7 +167,7 @@
                 The blue curve is the actual plant output. The orange curve is what the controller
                 measures. They are not necessarily equal during the transient response.
             </p>
-            <div id="responseGraph" style="width:100%; height:420px;"></div>
+            <div id="responseGraph" style="width:100%; height:420px;"></div><h3>Control signal u</h3><p class="small">Unlimited control in model units. Large commands indicate actuator demands that may be impractical.</p><div id="sensorCommand" style="width:100%;height:280px"></div>
         </section>
 
         <section class="section">
@@ -214,97 +182,6 @@
                 Change τs and compare the true output with the sensor measurement.
             </p>
         </section>
-
-
-
-<!-- 4. Predict, then check -->
-<section class="section">
-    <h2>4. Predict, then Check</h2>
-
-    <div class="intro">
-        Before changing the sensor time constant, predict how a slow
-        sensor affects the feedback signal and the PID response.
-        Choose your answers, then click Check Predictions.
-    </div>
-
-    <!-- Question 1 -->
-    <div class="prediction-question">
-        <h3>Q1. What happens when the sensor time constant (τs) increases?</h3>
-
-        <label>
-            <input type="radio" name="p2q1" value="a">
-            A. The sensor responds faster.
-        </label>
-
-        <label>
-            <input type="radio" name="p2q1" value="b">
-            B. The sensor responds more slowly and its measurement lags behind the true output.
-        </label>
-
-        <label>
-            <input type="radio" name="p2q1" value="c">
-            C. The plant gain becomes zero.
-        </label>
-    </div>
-
-    <hr>
-
-    <!-- Question 2 -->
-    <div class="prediction-question">
-        <h3>Q2. Which signal does the PID controller use to calculate its feedback error?</h3>
-
-        <label>
-            <input type="radio" name="p2q2" value="a">
-            A. The true plant output (y).
-        </label>
-
-        <label>
-            <input type="radio" name="p2q2" value="b">
-            B. The sensor measurement (ym).
-        </label>
-
-        <label>
-            <input type="radio" name="p2q2" value="c">
-            C. The plant gain (K).
-        </label>
-    </div>
-
-    <hr>
-
-    <!-- Question 3 -->
-    <div class="prediction-question">
-        <h3>Q3. What can happen when the sensor becomes very slow?</h3>
-
-        <label>
-            <input type="radio" name="p2q3" value="a">
-            A. The controller may react too late, causing more overshoot or oscillations.
-        </label>
-
-        <label>
-            <input type="radio" name="p2q3" value="b">
-            B. The feedback delay disappears.
-        </label>
-
-        <label>
-            <input type="radio" name="p2q3" value="c">
-            C. The controller no longer needs feedback.
-        </label>
-    </div>
-
-    <button id="checkPredictionButton" type="button">
-        Check Predictions
-    </button>
-
-    <button id="resetPredictionButton" type="button">
-        Try Again
-    </button>
-
-    <div id="predictionResult" class="note"
-         style="display:none; margin-top:15px;">
-    </div>
-</section>
-
-
 
         <section class="section">
             <h2>4. How the Simulation Works</h2>
