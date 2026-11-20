@@ -125,18 +125,20 @@ All formulas come from the lecture slides, and every member reviewed the code of
 
 ## Homework 2 — MARAI Control Toolkit
 
-The new index.html opens the two homework toolkits. The former Module 1 entry is now homework1.html. Upload the extracted files to the same GitHub Pages directory.
+Homework 2 extends the same site with a PID control section. The home page (index.html) opens both toolkits: Homework 1 (Module 1 is now homework1.html) and Homework 2 (the Control section, starting at p1.html).
 
-| Section | Entry | Features |
-| --- | --- | --- |
-| P1 | p1.html | First/second-order plants, filtered measurement derivative, actuator limits, metrics, three validation rows |
-| P2 | p2.html | True and measured outputs, sensor lag, command plot, prediction, unstable example |
-| P3 | p3.html | Sampled PID, sample-and-hold command, anti-windup, live Arduino code and copy |
-| P4 | p4.html | Hidden random second-order plant, three pass/fail checks, score |
-| My system | system.html | N20 drive motor model with sources, PI pole matching, 0–100% PWM simulation, check with τ halved and doubled, ESP32 code |
-| Bonus | bonus.html | State feedback/pole placement and Ziegler–Nichols ultimate-gain experiment |
+**Live website:** https://rahaf202122.github.io/encs4380-dynamics_Rahaf_Samar_Yasmeen_Sewar/
 
-Homework 2 module ownership must be entered by the team. The original Homework 1 ownership table above remains its historical assignment.
+| Section | Entry | Owner | Features |
+| --- | --- | --- | --- |
+| P1 | p1.html | Samar | First/second-order plants, filtered measurement derivative, actuator limits, metrics, three validation rows |
+| P2 | p2.html | Rahaf | True and measured outputs, sensor lag, command plot, prediction, unstable example |
+| P3 | p3.html | Sewar | Sampled PID, sample-and-hold command, anti-windup, overshoot against Ts chart, live Arduino code and copy |
+| P4 | p4.html | Yasmeen | Hidden random second-order plant, three pass/fail checks, score |
+| My system | system.html | All four members | N20 drive motor model with sources, PI pole matching, 0–100% PWM simulation, check with τ halved and doubled, ESP32 code |
+| Bonus | bonus.html | All four members | State feedback/pole placement and Ziegler–Nichols ultimate-gain experiment |
+
+Each Homework 2 module has its own GitHub Issue, assigned to its owner. The Homework 1 ownership table above is unchanged.
 
 ### Numerical methods and metric definitions
 
@@ -157,13 +159,6 @@ The plant is one Micromouse wheel: an N20 6 V 530 rpm gear motor with magnetic e
 
 Spec: 0.6 ≤ ζ ≤ 0.8 (we use 0.75), overshoot ≤ 10 %, settling ≤ 0.3 s, zero steady-state error, PWM within 0–100 %. Final PI gains with ωn = 30 rad/s: Kp ≈ 0.262 %/rpm, Ki ≈ 9.43 %/(rpm·s). Simulated: 5.7 % overshoot, 0.17 s settling, peak PWM 87 %. The page generates ESP32 code for these gains with the encoder speed reading included.
 
-### Submission tasks for the team
-
-- Assign one GitHub Issue per module and record owners.
-- Each member commits and understands their own work.
-- Verify deployed pages on a physical phone.
-- Publish the v2.0 release and submit the Pages URL.
-
 ### Additional AI assistance
 
-ChatGPT/Codex assisted with the MARAI landing page, navigation, Homework 2 JavaScript, numerical verification, bonus experiments, Arduino templates and this update. The team must review the equations and code and be able to explain them during the demo. A public reference site was inspected for feature coverage and presentation inspiration.
+ChatGPT/Codex assisted with the MARAI landing page, navigation, Homework 2 JavaScript, numerical verification, bonus experiments, Arduino templates and this update. The team must review the equations and code and be able to explain them during the demo. A public reference site was inspected for feature coverage and presentation inspiration. Claude (Anthropic) helped fix Module 2, add the navigation links, add the overshoot-against-Ts chart in P3, and build the My system page with the N20 motor model, the ESP32 code and this README section.
