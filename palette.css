@@ -1,0 +1,40 @@
+/* MARAI palette: cream and rose surfaces, plum text and controls. */
+:root{color-scheme:light;--cream:#FBE4D8;--rose:#DFB6B2;--mauve:#854F6C;--plum:#522B5B;--deep:#2B124C;--ink:#2B124C;--muted:#76566B;--bg:#fff7f1;--paper:#fff7f1;--accent:#854F6C}
+body{background:#fff7f1;color:#2B124C;background-image:radial-gradient(ellipse at 50% 0%,#FBE4D890,transparent 65%)}
+.top{background:linear-gradient(120deg,#FBE4D8,#DFB6B2)!important;color:#2B124C!important;border-bottom:1px solid #854F6C25}
+.top h1,.top p{color:#522B5B!important}
+.site-nav,.lab-nav{background:#f4d7cf!important;border-bottom:1px solid #DFB6B2;box-shadow:0 4px 18px #522B5B07}
+.site-nav a,.lab-nav a,.lab-nav a:first-child{color:#522B5B!important}
+.site-nav a:hover,.lab-nav a:hover{background:#DFB6B280!important;color:#2B124C!important}
+.site-nav a.active,.lab-nav a[aria-current]{background:#fff7f1!important;color:#2B124C!important;box-shadow:inset 0 -2px #854F6C}
+h1,h2,h3,h4,.module h2,.section h2{color:#522B5B}
+.panel,.module,.section{background:#fffdfa;border-color:#e9cec8!important;box-shadow:0 8px 30px #522B5B06!important}
+.box{background:#fff7f1;border-color:#e9cec8}
+.note,.intro:not(main>.intro),.equation,.formula,.experiment-guide,.result-card,.readout{background:#f9e9e2!important;border-color:#e5c6c1!important;color:#522B5B!important}
+.experiment-guide{border-left-color:#854F6C!important}
+.experiment-guide h2,.experiment-guide p,.result-card p,.value,.pass{color:#754562!important}
+.readout.pass{border-color:#9a8773!important}.readout.fail{border-color:#c28b87!important}.fail,#warn{color:#9c374b!important}
+.eyebrow,.lead,.small,.topics,.card p,.lab-title>p:last-child{color:#76566B}
+button{background:#854F6C;color:#fffaf7;border:1px solid #854F6C;border-radius:7px;padding:9px 13px;cursor:pointer}
+button:hover{background:#6c3c59}
+.preset-bar button{background:#f4ddd5;color:#63364e;border-color:#DFB6B2}
+.preset-bar button:hover{background:#ebcbc3}
+input[type=range]{accent-color:#854F6C!important}
+input[type=checkbox],input[type=radio]{accent-color:#854F6C}
+input[type=number],input[type=text],select{background:#fffdfa;color:#522B5B;border:1px solid #cfaaa6;border-radius:6px;padding:7px}
+output,#comparisonStatus{color:#854F6C}
+th{background:#f2d9d1!important;color:#522B5B}td,th{border-color:#e1c6bf!important}
+pre{background:#f8e7df;color:#522B5B;border:1px solid #e1c6bf}
+a{color:#754562}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline-color:#854F6C}
+footer,.lab-footer{color:#806275;border-color:#e5c8c0}
+/* Keep the home page's two cards and centered name in the same layout. */
+.nav{border-bottom-color:#854F6C20}.brand,.brand>span:first-child{color:#522B5B}.brand-caption,.course,.course span{color:#806275}
+main>.intro{background:transparent!important}main>.intro h1{color:#2B124C}h1 em{color:#854F6C}
+.card{background:#fffdfa;border-color:#e6c8c1;border-radius:22px;box-shadow:0 12px 30px #522B5B07}
+.card:hover{border-color:#b78b9b;box-shadow:0 22px 55px #522B5B12}
+.card:focus-visible{outline-color:#854F6C}.card h2{color:#522B5B}
+.visual{background:linear-gradient(130deg,#FBE4D8,#DFB6B2)}
+.feedback .visual{background:linear-gradient(130deg,#efd8df,#e1bdca)}
+.tag,.feedback .tag,.visual-caption{color:#63364e}
+.go{color:#854F6C;border-color:#c59ba6;background:#fff7f160}.card:hover .go{background:#DFB6B260}
+.topics{border-top-color:#e9cec8}.topics span{color:#a0798e}

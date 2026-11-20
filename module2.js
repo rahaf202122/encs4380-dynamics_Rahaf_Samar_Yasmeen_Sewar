@@ -424,6 +424,11 @@ function runValidation() {
     document.getElementById("phase50Result").textContent =
         phase50.toFixed(2) + "°";
 
+    // Validation check 3 in the table (expected values from the slides)
+    showCheck("v3a", "v3aS", maxTau * 1000, 0.52, 0.01);
+
+    showCheck("v3b", "v3bS", phase50, 9.3, 0.05);
+
 }
 
 
@@ -498,3 +503,33 @@ omegaSlider.addEventListener("input", function () {
 // Initialize the page
 update();
 runValidation();
+
+
+// Predict, then check
+function checkPrediction() {
+
+    const answer1 = document.querySelector('input[name="pred1"]:checked');
+    const answer2 = document.querySelector('input[name="pred2"]:checked');
+    const output = document.getElementById("predResult");
+
+    if (!answer1 || !answer2) {
+        output.textContent = "Answer both questions first.";
+        return;
+    }
+
+    let text = "";
+
+    if (answer1.value === "down") {
+        text += "Q1 correct: M = 1/√(1+(ωτ)²), so a bigger ω gives a smaller M. ";
+    } else {
+        text += "Q1 not quite: move the frequency slider up and watch the output sine get smaller. ";
+    }
+
+    if (answer2.value === "0.707") {
+        text += "Q2 correct: at ωτ = 1, M = 1/√2 = 0.707 (the red point on the Bode plot).";
+    } else {
+        text += "Q2 not quite: at ωτ = 1, M = 1/√(1+1) = 0.707. Look at the red point on the Bode plot.";
+    }
+
+    output.textContent = text;
+}

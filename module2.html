@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,58 +8,6 @@
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 
     <style>
-
-        /* Navigation between all modules */
-        .site-nav {
-            background: #2a1a66;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0;
-        }
-
-        .site-nav a {
-            color: #ded8f2;
-            text-decoration: none;
-            padding: 13px 18px;
-            font-weight: bold;
-            font-family: Arial, sans-serif;
-            transition: 0.3s;
-        }
-
-        .site-nav a:hover {
-            background: #50328f;
-            color: white;
-        }
-        .top {
-            background: rgb(19, 5, 64);
-            color: white;
-            padding: 25px;
-            text-align: center;
-        }
-        .top h1 {
-            margin: 0 0 10px;
-        }
-
-        .top p {
-            margin: 0 0 6px;
-            color: #ded8f2;
-        }
-
-        .site-nav a.active {
-            background: #f4f2fa;
-            color: rgb(19, 5, 64);
-        }
-
-        @media (max-width: 600px) {
-            .site-nav a {
-                flex: 1 1 50%;
-                text-align: center;
-                padding: 12px 5px;
-                font-size: 13px;
-            }
-        }
-
         * {
             box-sizing: border-box;
         }
@@ -68,7 +15,6 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 25px;
             background: #f4f6fb;
             color: #222;
         }
@@ -76,6 +22,7 @@
         .container {
             max-width: 1100px;
             margin: auto;
+            padding: 25px 16px;
         }
 
         h1, h2 {
@@ -191,8 +138,8 @@
         }
 
         @media (max-width: 600px) {
-            body {
-                padding: 12px;
+            .container {
+                padding: 16px 12px;
             }
 
             .section {
@@ -207,36 +154,70 @@
                 padding: 7px;
             }
         }
+    
+        /* page header and navigation bar (same on every page) */
+        .top { background: rgb(19, 5, 64); color: white; padding: 25px; text-align: center; }
+        .top h1 { margin: 0 0 10px; color: white; }
+        .top p { margin: 0; color: #ded8f2; }
+        .site-nav { background: #2a1a66; display: flex; flex-wrap: wrap; justify-content: center; }
+        .site-nav a { color: #ded8f2; text-decoration: none; padding: 12px 16px; font-weight: bold; font-family: Arial, sans-serif; }
+        .site-nav a:hover { background: #50328f; color: white; }
+        .site-nav a.active { background: #f4f2fa; color: rgb(19, 5, 64); }
 
+        /* predict, then check */
+        .predict label { display: block; margin: 6px 0; cursor: pointer; font-weight: normal; }
     </style>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="lab.css">
+<link rel="stylesheet" href="palette.css">
 </head>
 
 <body>
 
-    <div class="top">
-        <h1>Dynamic Characteristics Toolkit</h1>
-        <p>Module 2: Frequency Response - First Order Response</p>
-    </div>
+<!-- Page header -->
+<div class="top">
+    <h1>Dynamic Characteristics Toolkit</h1>
+    <p>Module 2: First-Order Frequency Response</p>
+</div>
 
-
-
-    <nav class="site-nav">
-        <a href="index.html">Module 1</a>
-        <a href="module2.html" class="active">Module 2</a>
-        <a href="module3.html">Module 3</a>
-        <a href="module4.html">Module 4</a>
-    </nav>
-
-
+<!-- Navigation between the modules -->
+<nav class="site-nav">
+    <a href="index.html">MARAI Home</a>
+    <a href="homework1.html">Module 1: Time Response</a>
+    <a href="module2.html" class="active">Module 2: Frequency Response</a>
+    <a href="module3.html">Module 3: Second Order</a>
+    <a href="module4.html">Module 4: Guess the Sensor</a>
+        <a href="p1.html">Control P1: PID Playground</a>
+</nav>
 
 <div class="container">
-
-    <h1>Module 2: First Order Frequency Response</h1>
 
     <p>
         This module demonstrates the frequency response of a first-order system.
         Change the parameters and observe how the output changes.
     </p>
+
+    <!-- Predict, then check -->
+    <div class="section predict">
+
+        <h2>Predict, then check</h2>
+
+        <p><strong>Before you touch the sliders, guess:</strong></p>
+
+        <p>Question 1: τ stays the same and you <u>increase</u> the input frequency. What happens to the amplitude ratio M?</p>
+        <label><input type="radio" name="pred1" value="down"> M becomes smaller</label>
+        <label><input type="radio" name="pred1" value="up"> M becomes bigger</label>
+        <label><input type="radio" name="pred1" value="same"> M stays the same</label>
+
+        <p>Question 2: the input frequency is exactly the cutoff, ω = 1/τ. What is M?</p>
+        <label><input type="radio" name="pred2" value="1"> 1</label>
+        <label><input type="radio" name="pred2" value="0.707"> 0.707</label>
+        <label><input type="radio" name="pred2" value="0.5"> 0.5</label>
+
+        <button onclick="checkPrediction()">Check my answers</button>
+        <p id="predResult"></p>
+
+    </div>
 
     <div class="section">
 
@@ -260,7 +241,7 @@
 
         <div class="control">
             <label>
-                Input Frequency: <span class="value" id="frequencyValue">0.50</span> Hz
+                Input Frequency: <span class="value" id="frequencyValue">0.500 Hz</span>
             </label>
             <input type="range" id="frequencySlider"
                    min="0.01" max="10" step="0.001" value="0.5">
@@ -274,18 +255,12 @@
                    min="0.1" max="5" step="0.1" value="1">
         </div>
 
-        <div class="slider-box">
-            <label for="frequency">Input Frequency (f) - Hz</label>
-            <input type="range" id="frequency" min="0.1" max="10" step="0.001" value="0.318">
-            <span class="value" id="frequencyValue">0.318 Hz</span>
-        </div>
-
-        <div class="slider-box">
-            <label for="omega">Angular Frequency (ω) - rad/s</label>
-            <input type="range" id="omega"
-                   min="0.628" max="62.832" step="0.001" value="2">
-            <span class="value" id="omegaControlValue">2.000 rad/s</span>
-        </div>
+       <div class="slider-box">
+    <label for="omega">Angular Frequency (ω) - rad/s</label>
+    <input type="range" id="omega"
+           min="0.628" max="62.832" step="0.001" value="2">
+    <span class="value" id="omegaControlValue">2.000 rad/s</span>
+</div>
 
         <button onclick="setValidationExample()">
             Validation Example
@@ -422,6 +397,20 @@
                     <td>5 rad/s</td>
                     <td id="v2d">-</td>
                     <td id="v2dS" class="validation-result">-</td>
+                </tr>
+
+                <tr>
+                    <td>Maximum τ for 5% error up to 100 Hz (ms)</td>
+                    <td>0.52 ms</td>
+                    <td id="v3a">-</td>
+                    <td id="v3aS" class="validation-result">-</td>
+                </tr>
+
+                <tr>
+                    <td>Phase lag at 50 Hz with this τ</td>
+                    <td>9.3°</td>
+                    <td id="v3b">-</td>
+                    <td id="v3bS" class="validation-result">-</td>
                 </tr>
 
             </tbody>
