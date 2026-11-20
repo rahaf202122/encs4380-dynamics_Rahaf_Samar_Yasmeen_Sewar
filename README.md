@@ -131,9 +131,9 @@ Homework 2 extends the same site with a PID control section. The home page (inde
 
 | Section | Entry | Owner | Features |
 | --- | --- | --- | --- |
-| P1 | p1.html | Samar | First/second-order plants, filtered measurement derivative, actuator limits, metrics, three validation rows |
+| P1 | p1.html | Sewar | First/second-order plants, filtered measurement derivative, actuator limits, metrics, three validation rows |
 | P2 | p2.html | Rahaf | True and measured outputs, sensor lag, command plot, prediction, unstable example |
-| P3 | p3.html | Sewar | Sampled PID, sample-and-hold command, anti-windup, overshoot against Ts chart, live Arduino code and copy |
+| P3 | p3.html | Samar | Sampled PID, sample-and-hold command, anti-windup, overshoot against Ts chart, live Arduino code and copy |
 | P4 | p4.html | Yasmeen | Hidden random second-order plant, three pass/fail checks, score |
 | My system | system.html | All four members | N20 drive motor model with sources, PI pole matching, 0–100% PWM simulation, check with τ halved and doubled, ESP32 code |
 | Bonus | bonus.html | All four members | State feedback/pole placement and Ziegler–Nichols ultimate-gain experiment |
