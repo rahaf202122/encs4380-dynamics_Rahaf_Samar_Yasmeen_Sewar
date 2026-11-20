@@ -122,3 +122,48 @@ We used Claude (an AI assistant by Anthropic) to help with this project:
 - Writing this README.
 
 All formulas come from the lecture slides, and every member reviewed the code of their own module and can explain it.
+
+## Homework 2 — MARAI Control Toolkit
+
+The new index.html opens the two homework toolkits. The former Module 1 entry is now homework1.html. Upload the extracted files to the same GitHub Pages directory.
+
+| Section | Entry | Features |
+| --- | --- | --- |
+| P1 | p1.html | First/second-order plants, filtered measurement derivative, actuator limits, metrics, three validation rows |
+| P2 | p2.html | True and measured outputs, sensor lag, command plot, prediction, unstable example |
+| P3 | p3.html | Sampled PID, sample-and-hold command, anti-windup, live Arduino code and copy |
+| P4 | p4.html | Hidden random second-order plant, three pass/fail checks, score |
+| My system | system.html | N20 drive motor model with sources, PI pole matching, 0–100% PWM simulation, check with τ halved and doubled, ESP32 code |
+| Bonus | bonus.html | State feedback/pole placement and Ziegler–Nichols ultimate-gain experiment |
+
+Homework 2 module ownership must be entered by the team. The original Homework 1 ownership table above remains its historical assignment.
+
+### Numerical methods and metric definitions
+
+P1 and P4 reuse sim.js and its RK4 integrator. P2 uses forward Euler with a step chosen to resolve the sensor and plant dynamics. P3 samples at k*Ts and integrates the held-input plant using RK4 substeps. State feedback uses RK4 on position and velocity. Ziegler–Nichols uses sim.js with the additional three-lag demonstration plant.
+
+P1 retains its final-output-based rise, overshoot and settling definitions, documented on its page. New labs report overshoot and settling relative to the setpoint. A quiet final window is evidence of approximate convergence within the chosen run, not a mathematical proof of asymptotic convergence. Extend the run when diagnosing slow responses. P4 permits at most 1% steady error as its numerical interpretation of zero error.
+
+P1 validation was checked with K=tau=1: Kp=9 gives 10% error and a 10–90% rise around 0.2197 s. Kp=Ki=1 gives characteristic wn=zeta=1 and negligible final step error. At the bonus model's Ku=12.6, measured peak period was approximately 1.4056 s versus theoretical 1.4050 s.
+
+### My system: where the numbers come from
+
+All motor numbers are taken from the datasheets of our parts (links on the page).
+
+The plant is one Micromouse wheel: an N20 6 V 530 rpm gear motor with magnetic encoder (Roboticx ROBO-18014), driven by an L298N from an ESP32 and 2 × 18650 cells. Input is PWM duty in %, output is wheel speed in rpm.
+
+- K ≈ 4.77 rpm per % PWM: 530 rpm at 6 V, scaled to the 5.4 V the motor gets at 100 % PWM (7.4 V battery minus about 2 V L298N drop, from the ST L298 datasheet).
+- τ = 0.05 s: the datasheet does not give τ, so we use the usual value for an N20 gear motor with a light wheel. The page also checks the design with τ halved and doubled.
+
+Spec: 0.6 ≤ ζ ≤ 0.8 (we use 0.75), overshoot ≤ 10 %, settling ≤ 0.3 s, zero steady-state error, PWM within 0–100 %. Final PI gains with ωn = 30 rad/s: Kp ≈ 0.262 %/rpm, Ki ≈ 9.43 %/(rpm·s). Simulated: 5.7 % overshoot, 0.17 s settling, peak PWM 87 %. The page generates ESP32 code for these gains with the encoder speed reading included.
+
+### Submission tasks for the team
+
+- Assign one GitHub Issue per module and record owners.
+- Each member commits and understands their own work.
+- Verify deployed pages on a physical phone.
+- Publish the v2.0 release and submit the Pages URL.
+
+### Additional AI assistance
+
+ChatGPT/Codex assisted with the MARAI landing page, navigation, Homework 2 JavaScript, numerical verification, bonus experiments, Arduino templates and this update. The team must review the equations and code and be able to explain them during the demo. A public reference site was inspected for feature coverage and presentation inspiration.

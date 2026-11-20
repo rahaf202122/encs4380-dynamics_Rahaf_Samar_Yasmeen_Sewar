@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MARAI · My system · Drive motor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="lab.css">
+<script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script defer src="sim.js"></script>
+<script defer src="lab.js"></script>
+<script defer src="system.js"></script>
+<link rel="stylesheet" href="palette.css">
+<style>
+  .source-table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+  .source-table th, .source-table td { border-bottom: 1px solid #e3d6dd; padding: 8px 6px; text-align: left; vertical-align: top; }
+  .table-wrap { overflow-x: auto; }
+  .note { background: #fdf3f6; border-left: 4px solid #854F6C; padding: 10px 12px; }
+</style>
+</head>
+<body>
+<nav class="lab-nav">
+  <a href="index.html">MARAI</a>
+  <a href="p1.html">P1 · Playground</a>
+  <a href="p2.html">P2 · Slow sensor</a>
+  <a href="p3.html">P3 · Digital PID</a>
+  <a href="p4.html">P4 · Tuning challenge</a>
+  <a href="system.html" aria-current="page">My system</a>
+  <a href="bonus.html">Bonus lab</a>
+</nav>
+
+<main class="lab">
+<header class="lab-title">
+  <p class="eyebrow">MARAI / CONTROL TOOLKIT</p>
+  <h1>My system · Micromouse drive motor</h1>
+  <p>A PI speed loop for one wheel of our Micromouse.</p>
+</header>
+
+<section class="panel">
+  <h2>1. The plant and where its numbers come from</h2>
+  <p>All motor numbers below are taken from the datasheets of our parts. Our Micromouse drives each wheel with an <strong>N20 DC gear motor with magnetic encoder, 6 V, 530 RPM</strong>
+     (Roboticx part ROBO-18014), through an <strong>L298N</strong> driver, controlled by an <strong>ESP32</strong>,
+     and powered by <strong>2 × 18650</strong> Li-ion cells. The model is the first-order plant from Module 1:</p>
+  <p style="text-align:center"><strong>G(s) = K / (τs + 1)</strong>, &nbsp; input: PWM duty in %, &nbsp; output: wheel speed in rpm</p>
+
+  <div class="table-wrap">
+  <table class="source-table">
+    <tr><th>Quantity</th><th>Value</th><th>Source</th></tr>
+    <tr><td>Rated no-load speed</td><td>530 rpm at 6 V</td><td>Motor datasheet / product sheet: Roboticx ROBO-18014, "N20 DC Motor with Magnetic Encoder – 6V 530 RPM"</td></tr>
+    <tr><td>Battery voltage</td><td>7.4 V nominal (2 × 3.7 V)</td><td>18650 Li-ion cells in series</td></tr>
+    <tr><td>L298N voltage drop</td><td>≈ 2 V</td><td><a href="https://www.st.com/resource/en/datasheet/l298.pdf" target="_blank" rel="noopener">ST L298 datasheet</a>: the total drop of the bridge (high + low side) is 1.8–3.2 V at 1 A, and less at the small current of an N20 motor</td></tr>
+    <tr><td>Motor voltage at 100 % PWM</td><td>7.4 − 2 = 5.4 V</td><td>From the two rows above</td></tr>
+    <tr><td><strong>K</strong></td><td><strong>530 × 5.4/6 ÷ 100 ≈ 4.77 rpm per % PWM</strong></td><td>Taken from the datasheets above: no-load speed scales with voltage for a DC motor</td></tr>
+    <tr><td><strong>τ</strong></td><td><strong>0.05 s</strong></td><td>The datasheet does not give τ, so we use the usual value for an N20 gear motor with a light wheel (tens of milliseconds). The design is also checked from 0.025 s to 0.1 s in section 3</td></tr>
+    <tr><td>Encoder resolution</td><td>420 counts per wheel turn</td><td>7 pulses per motor turn × 2 edges × 30:1 gear, from the <a href="https://www.robotshop.com/products/6v-301-530rpm-micro-metal-gearmotor-encoder" target="_blank" rel="noopener">6 V 30:1 530 rpm N20 product sheet</a></td></tr>
+  </table>
+  </div>
+
+
+  <div class="controls">
+    <label>Gain K (rpm per % PWM)<output id="KValue"></output>
+      <input id="K" type="range" min="1" max="10" step="0.01" value="4.77"></label>
+    <label>Time constant τ (s)<output id="tauValue"></output>
+      <input id="tau" type="range" min="0.01" max="0.3" step="0.005" value="0.05"></label>
+    <label>Target wheel speed (rpm)<output id="targetValue"></output>
+      <input id="target" type="range" min="50" max="470" step="10" value="300"></label>
+    <label>Desired damping ζ<output id="zValue"></output>
+      <input id="z" type="range" min="0.6" max="0.8" step="0.01" value="0.75"></label>
+    <label>Desired ωn (rad/s)<output id="wnValue"></output>
+      <input id="wn" type="range" min="10" max="60" step="1" value="30"></label>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>2. The spec and why it matters for the Micromouse</h2>
+  <ul>
+    <li><strong>Damping 0.6 ≤ ζ ≤ 0.8</strong> (we use 0.75): the practical range from the lecture, fast but without ringing.</li>
+    <li><strong>Overshoot ≤ 10 %</strong>: if a wheel overshoots its speed, the mouse drifts in a turn or slips on the floor.</li>
+    <li><strong>Settling time (2 %) ≤ 0.3 s</strong>: the mouse changes speed at every cell. Both wheels must reach their speed quickly, or the mouse does not drive straight.</li>
+    <li><strong>Zero steady-state error</strong>: both wheels must turn at exactly the commanded speed, again so the mouse drives straight. PI control gives this.</li>
+    <li><strong>PWM within 0–100 %</strong>: the L298N cannot give more than full duty, so the design must work inside this limit.</li>
+    <li><strong>Target 300 rpm</strong>: about 63 % of the top speed (≈ 477 rpm), which leaves room for the controller to speed up.</li>
+  </ul>
+</section>
+
+<section class="panel">
+  <h2>3. PI design and simulated response</h2>
+  <p>With PI control the closed loop is τs² + (1 + KKp)s + KKi = 0. Matching it to τ(s² + 2ζωn s + ωn²) gives
+     <strong>Kp = (2ζωnτ − 1)/K</strong> and <strong>Ki = τωn²/K</strong>. The PI zero adds some overshoot, so the
+     simulation (RK4, with the 0–100 % PWM limit and anti-windup) checks the real result.</p>
+  <p id="gains"></p>
+  <div id="outputPlot" class="plot"></div>
+  <div id="commandPlot" class="plot"></div>
+  <div id="results" class="readouts"></div>
+  <p id="systemStatus" role="status"></p>
+
+  <h3>Is the design safe if τ is different?</h3>
+  <p>The same gains are run with τ halved and doubled. A good design should still settle in all three.</p>
+  <div id="robustPlot" class="plot"></div>
+  <p id="robustNote" role="status"></p>
+</section>
+
+<section class="panel">
+  <h2>4. ESP32 code for these gains</h2>
+  <p>The code updates every 10 ms: it reads the wheel speed from the encoder, computes the PI command with anti-windup,
+     and writes the PWM to IN1 of the L298N (the ENA jumper stays on). The gains change when you move the sliders.</p>
+  <pre><code id="arduino"></code></pre>
+  <button id="copy">Copy code</button>
+  <span id="copyStatus" role="status"></span>
+</section>
+</main>
+<footer class="lab-footer">Birzeit University · ENCS4380 · Experiment, predict, understand.</footer>
+</body>
+</html>
