@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2 - A Slow Sensor in the Loop</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6fb;
+            color: #222;
+        }
+        .top {
+            background: rgb(19, 5, 64);
+            color: white;
+            padding: 25px 16px;
+            text-align: center;
+        }
+        .top h1 { margin: 0 0 10px; color: white; }
+        .top p { margin: 0; color: #ded8f2; }
+        .site-nav {
+            background: #2a1a66;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .site-nav a {
+            color: #ded8f2;
+            text-decoration: none;
+            padding: 12px 16px;
+            font-weight: bold;
+        }
+        .site-nav a:hover { background: #50328f; color: white; }
+        .site-nav a.active { background: #f4f2fa; color: rgb(19, 5, 64); }
+        .container { max-width: 1100px; margin: auto; padding: 25px 16px; }
+        .section {
+            background: white;
+            padding: 22px;
+            margin-bottom: 22px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        h1, h2 { color: #25205c; }
+        .section h2 { margin-top: 0; }
+        .intro, .note {
+            background: #f0efff;
+            border-left: 4px solid #5146a5;
+            padding: 15px;
+            border-radius: 5px;
+            line-height: 1.6;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 18px;
+        }
+        .control { margin-bottom: 8px; }
+        .control label { display: flex; justify-content: space-between; gap: 8px; font-weight: bold; margin-bottom: 8px; }
+        input[type="range"] { width: 100%; accent-color: #5146a5; }
+        .value { color: #5146a5; white-space: nowrap; }
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+            gap: 14px;
+        }
+        .result-card {
+            background: #f0efff;
+            padding: 14px;
+            border-radius: 9px;
+            text-align: center;
+        }
+        .result-card h3 { margin: 5px 0; font-size: 14px; }
+        .result-card p { font-size: 21px; font-weight: bold; color: #5146a5; margin: 8px 0; }
+        button {
+            background: #5146a5; color: white; border: none;
+            padding: 11px 18px; border-radius: 7px; cursor: pointer;
+            margin: 5px; font-size: 14px;
+        }
+        button:hover { background: #393078; }
+        .equation {
+            background: #faf9ff; padding: 12px; border-radius: 8px;
+            overflow-x: auto; font-family: "Courier New", monospace;
+        }
+        .small { color: #555; font-size: 14px; line-height: 1.5; }
+        @media (max-width: 600px) {
+            .container { padding: 16px 12px; }
+            .section { padding: 15px; }
+            .top { padding: 20px 12px; }
+        }
+    </style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"><link rel="stylesheet" href="lab.css"><link rel="stylesheet" href="palette.css"></head>
+<body>
+    <header class="top">
+        <h1>Dynamic Characteristics Toolkit</h1>
+        <p>Homework 2 — P2: A Slow Sensor in the Loop</p>
+    </header>
+
+    <nav class="lab-nav"><a href="index.html">MARAI</a><a href="p1.html" >P1 · Playground</a><a href="p2.html" aria-current="page">P2 · Slow sensor</a><a href="p3.html" >P3 · Digital PID</a><a href="p4.html" >P4 · Tuning challenge</a><a href="system.html" >My system</a><a href="bonus.html" >Bonus lab</a></nav>
+
+    <main class="container"><aside class="experiment-guide"><h2>See what the controller is missing</h2><p>Press Reset Parameters first. The blue line is the real output, and the orange line is the sensor reading. Increase the sensor time constant slowly and watch the gap between them. Then try Slow Sensor Example. Reduce τs to 0.1 s while keeping the other gains unchanged to see why the feedback becomes easier to control.</p></aside>
+        <section class="section">
+            <h2>What are we investigating?</h2>
+            <div class="intro">
+                The controller does not see the true plant output directly. It receives the sensor
+                measurement, and a slow sensor takes time to follow changes in the true output.
+                Increase the sensor time constant (τs) and observe how the measured signal lags
+                behind the real system response.
+            </div>
+            <p class="small">
+                The feedback error is calculated from the sensor measurement:
+                <strong>e(t) = r(t) − ym(t)</strong>, not from the true output y(t).
+            </p>
+        </section>
+
+        <section class="section" aria-labelledby="predictionTitle">
+            <h2 id="predictionTitle">Predict, then check</h2>
+            <p>With K = 1, τ = 1 s, Kp = 2, Ki = 5 and Kd = 0, what happens when the sensor time constant increases from 0.1 s to 2 s?</p>
+            <label><input type="radio" name="sensorPrediction" value="unstable"> The loop becomes unstable and oscillations grow.</label><br>
+            <label><input type="radio" name="sensorPrediction" value="faster"> The loop settles faster.</label><br>
+            <label><input type="radio" name="sensorPrediction" value="same"> The response stays the same.</label><br>
+            <button id="checkPrediction" type="button">Check my prediction</button>
+            <p id="predictionFeedback" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="section">
+            <h2>1. System and PID Parameters</h2>
+            <div class="controls">
+                <div class="control">
+                    <label for="kSlider">Plant Gain (K) <span class="value" id="kValue">1.0</span></label>
+                    <input type="range" id="kSlider" min="0.5" max="3" step="0.1" value="1">
+                </div>
+                <div class="control">
+                    <label for="tauSlider">Plant Time Constant (τ) <span class="value" id="tauValue">1.00 s</span></label>
+                    <input type="range" id="tauSlider" min="0.2" max="3" step="0.1" value="1">
+                </div>
+                <div class="control">
+                    <label for="tauSSlider">Sensor Time Constant (τs) <span class="value" id="tauSValue">0.10 s</span></label>
+                    <input type="range" id="tauSSlider" min="0.01" max="2" step="0.01" value="0.1">
+                </div>
+                <div class="control">
+                    <label for="kpSlider">Proportional Gain (Kp) <span class="value" id="kpValue">2.0</span></label>
+                    <input type="range" id="kpSlider" min="0" max="10" step="0.1" value="2">
+                </div>
+                <div class="control">
+                    <label for="kiSlider">Integral Gain (Ki) <span class="value" id="kiValue">1.0</span></label>
+                    <input type="range" id="kiSlider" min="0" max="5" step="0.1" value="1">
+                </div>
+                <div class="control">
+                    <label for="kdSlider">Derivative Gain (Kd) <span class="value" id="kdValue">0.0</span></label>
+                    <input type="range" id="kdSlider" min="0" max="3" step="0.05" value="0">
+                </div>
+                <div class="control">
+                    <label for="setpointSlider">Setpoint (r) <span class="value" id="setpointValue">1.0</span></label>
+                    <input type="range" id="setpointSlider" min="0.5" max="3" step="0.1" value="1">
+                </div>
+            </div>
+            <button id="resetButton" type="button">Reset Parameters</button>
+            <button id="exampleButton" type="button">Slow Sensor Example</button>
+        </section>
+
+        <section class="section">
+            <h2>2. True Output vs. Sensor Measurement</h2>
+            <p class="small">
+                The blue curve is the actual plant output. The orange curve is what the controller
+                measures. They are not necessarily equal during the transient response.
+            </p>
+            <div id="responseGraph" style="width:100%; height:420px;"></div><h3>Control signal u</h3><p class="small">Unlimited control in model units. Large commands indicate actuator demands that may be impractical.</p><div id="sensorCommand" style="width:100%;height:280px"></div>
+        </section>
+
+        <section class="section">
+            <h2>3. Performance Results</h2>
+            <div class="results">
+                <div class="result-card"><h3>Overshoot</h3><p id="overshootResult">—</p></div>
+                <div class="result-card"><h3>Settling Time (2%)</h3><p id="settlingResult">—</p></div>
+                <div class="result-card"><h3>Final True Output</h3><p id="finalTrueResult">—</p></div>
+                <div class="result-card"><h3>Steady-State Error</h3><p id="steadyErrorResult">—</p></div>
+            </div>
+            <p id="behaviorNote" class="note" style="margin-top:18px;">
+                Change τs and compare the true output with the sensor measurement.
+            </p>
+        </section>
+
+        <section class="section">
+            <h2>4. How the Simulation Works</h2>
+            <p>The plant is modeled as a first-order system:</p>
+            <div class="equation">dy/dt = (K · u − y) / τ</div>
+            <p>The sensor is also modeled as a first-order system:</p>
+            <div class="equation">dym/dt = (y − ym) / τs</div>
+            <p>The PID controller uses the measured output to calculate the error:</p>
+            <div class="equation">e = r − ym &nbsp;&nbsp; and &nbsp;&nbsp; u = Kp·e + Ki·∫e dt + Kd·de/dt</div>
+            <p class="small">
+                This page uses the Euler numerical method. At each small time step, it estimates
+                the change in the plant and sensor outputs, then advances the simulation.
+            </p>
+        </section>
+    </main>
+
+    <script src="p2.js"></script>
+</body>
+</html>
