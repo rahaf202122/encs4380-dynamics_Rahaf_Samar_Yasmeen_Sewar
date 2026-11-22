@@ -117,8 +117,8 @@ To run it locally, download the repository and open `index.html` in a browser (a
 We used Claude (an AI assistant by Anthropic) to help with this project:
 
 - Explaining the homework requirements and the lecture formulas.
-- Writing and reviewing parts of the JavaScript code, such as the plotting code, the navigation bar between the modules, and the validation checks.
-- Finding and fixing bugs, and testing the pages on desktop and phone screen sizes.
+- Writing and reviewing parts of the JavaScript code, such as the plotting code, the navigation bar between the modules.
+- Finding and fixing bugs.
 - Writing this README.
 
 All formulas come from the lecture slides, and every member reviewed the code of their own module and can explain it.
